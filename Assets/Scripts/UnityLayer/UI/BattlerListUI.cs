@@ -2,9 +2,11 @@ using System.Text;
 using TMPro;
 using UnityEngine;
 
-namespace AWE.Synzza.Monocomponents.UI {
+namespace AWE.Synzza.UnityLayer.Monocomponents.UI {
     public class BattlerListUI : MonoBehaviour {
+        [Tooltip("Text UI element for listing the friendly battlers.")]
         [SerializeField] private TextMeshProUGUI _playerListText;
+        [Tooltip("Text UI element for listing the enemy battlers.")]
         [SerializeField] private TextMeshProUGUI _enemyListText;
 
         private void Start() {

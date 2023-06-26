@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f332a2924652f624e9c9a14f2e034459, type: 3}
+  m_Name: Melee Attack
+  m_EditorClassIdentifier: 
+  _displayName: 
+  _isUsingDefaultCooldownTurns: 0
+  _cooldownTurns: 1
+  _windUpDurationSeconds: 0
+  _windUpVarianceSeconds: 0
+  _isEffectIndefinite: 0
+  _effectDurationSeconds: 0
+  _windDownDurationSeconds: 0
+  _isInterruptible: 0
+  _isUsingDefaultAttackRange: 0
+  _minAttackRange: 0
+  _maxAttackRange: 0
+  _projectile: {fileID: 0}
+  _spawnProfile: {fileID: 0}
+  _displayProfile: {fileID: 0}

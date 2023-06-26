@@ -1,8 +1,9 @@
 using UnityEngine;
 
-namespace AWE.Synzza.Monocomponents {
+namespace AWE.Synzza.UnityLayer.Monocomponents {
     [RequireComponent(typeof(Rigidbody))]
     public class PlayerControllerMonocomponent : MonoBehaviour {
+        [Tooltip("Player's movement speed.")]
         [SerializeField] private float _speed;
 
         private Rigidbody _rigidbody;

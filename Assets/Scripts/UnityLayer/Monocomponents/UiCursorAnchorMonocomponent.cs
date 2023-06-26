@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AWE.Synzza.Monocomponents {
+namespace AWE.Synzza.UnityLayer.Monocomponents {
     public class UiCursorAnchorMonocomponent : MonoBehaviour {
         public Camera WorldGameCamera;
 

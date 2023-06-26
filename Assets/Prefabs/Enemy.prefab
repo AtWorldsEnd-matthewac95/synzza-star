@@ -13,8 +13,9 @@ GameObject:
   - component: {fileID: 1827725025297540593}
   - component: {fileID: 1827725025297540592}
   - component: {fileID: 1827725025297540595}
-  - component: {fileID: 1827725025297540594}
   - component: {fileID: 1827725025297540588}
+  - component: {fileID: 2801352658361182470}
+  - component: {fileID: 223442338871660633}
   m_Layer: 0
   m_Name: Enemy
   m_TagString: Untagged
@@ -122,29 +123,6 @@ NavMeshAgent:
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 1
---- !u!114 &1827725025297540594
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1827725025297540597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: afc8659a24f01804296111455928b818, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _positionalTargets:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  _validPositionalTargetCount: 5
-  _targetPlayerChance: 0.4
 --- !u!114 &1827725025297540588
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -157,4 +135,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3618e4da374544646af71aadba6ddb4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _displayName: An Enemy
+  _battler: {fileID: 11400000, guid: c3ac8b8c97dd8024293bbacb70b30a33, type: 2}
+--- !u!114 &2801352658361182470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827725025297540597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b33dc2d2c907ffc4f89037aeadc1e55c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  WorldGameCamera: {fileID: 0}
+  _rightWorldOffset: 1
+  _topWorldOffset: 1
+  _forwardWorldOffset: 1
+  _leftWorldOffset: 1
+  _bottomWorldOffset: 1
+  _backwardWorldOffset: 1
+--- !u!114 &223442338871660633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827725025297540597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 808697874c7dc6f4d947bf5117b9d02e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _movementSettings:
+    _sceneMonocomponent: {fileID: 0}
+    _positionalTargets:
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    - {fileID: 0}
+    _validPositionalTargetCount: 5
+    _targetPlayerChance: 0.4
