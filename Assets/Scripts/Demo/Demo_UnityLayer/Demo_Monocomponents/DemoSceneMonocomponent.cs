@@ -5,7 +5,7 @@ using AWE.Synzza.UnityLayer.Monocomponents;
 
 namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
     public class DemoSceneMonocomponent : MonoBehaviour, IScene {
-        [SerializeField] private PlayerControllerMonocomponent _player;
+        [SerializeField] private PlayerBattlerMonocomponent _player;
 
         private void Start() {
             Debug.Assert(_player != null, $"{GetType().Name} {gameObject.name} does not have a reference to the player transform!");

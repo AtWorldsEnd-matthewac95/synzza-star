@@ -6,6 +6,8 @@ namespace AWE.Synzza {
         public float Max { get; }
 
         public FloatRange(float min, float max) { Min = min; Max = max; }
+
+        public bool IsWithin(float value) => value > Min && value < Max;
     }
 
     public static class GameRandom {

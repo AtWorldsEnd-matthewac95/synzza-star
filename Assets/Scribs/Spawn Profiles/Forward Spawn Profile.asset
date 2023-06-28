@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: Forward Spawn Profile
   m_EditorClassIdentifier: 
   _spawnerPositionalOffset: {x: 0, y: 0, z: 0}
-  _spawnerDirectionalOffsetMagnitudes: {x: 0, y: 0, z: 0}
-  _isInheritingSpawnerRotation: 0
+  _spawnerDirectionalOffsetMagnitudes: {x: 0, y: 0, z: 1}
+  _isInheritingSpawnerRotation: 1
   _isIgnoringInheritedXRotation: 0
   _isIgnoringInheritedYRotation: 0
   _isIgnoringInheritedZRotation: 0

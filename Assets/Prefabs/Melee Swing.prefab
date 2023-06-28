@@ -27,7 +27,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4207812878019121114}
   m_LocalRotation: {x: -0, y: 0.38268343, z: -0, w: 0.92387956}
-  m_LocalPosition: {x: 0, y: -0.4, z: 1.4}
+  m_LocalPosition: {x: 0, y: -0.4, z: 0.4}
   m_LocalScale: {x: 2, y: 0.4, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -92,7 +92,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4207812878019121114}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
@@ -106,8 +106,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4207812878194664319}
+  - component: {fileID: 3627625161054022673}
   m_Layer: 3
-  m_Name: Skill Root
+  m_Name: Melee Swing
   m_TagString: Attacks
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -130,6 +131,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3627625161054022673
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4207812878194664312}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 398a9a01aa83a584b99b5a8900d30605, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4207812879023562915
 GameObject:
   m_ObjectHideFlags: 0
@@ -157,7 +170,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4207812879023562915}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.4, z: 0.9}
+  m_LocalPosition: {x: 0, y: -0.4, z: -0.1}
   m_LocalScale: {x: 2.8, y: 0.4, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -222,7 +235,7 @@ BoxCollider:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4207812879023562915}
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}

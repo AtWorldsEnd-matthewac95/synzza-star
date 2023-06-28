@@ -14,6 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _displayName: An Enemy
   _defaultSkillCooldown: 1
-  _defaultMeleeAttackRange: 0
+  _defaultMeleeAttackRange: 1
   _defaultMeleeState: 0
   _defaultRangeState: 0

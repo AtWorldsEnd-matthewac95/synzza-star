@@ -9,11 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d64348a23b73efd41ace676214bfc125, type: 3}
-  m_Name: EnemySecond
+  m_Script: {fileID: 11500000, guid: 824cec21207ba524b8b857a9a6cf5067, type: 3}
+  m_Name: Uses Default Attack Range
   m_EditorClassIdentifier: 
-  _displayName: Another Enemy
-  _defaultSkillCooldown: 1
-  _defaultMeleeAttackRange: 1
-  _defaultMeleeState: 0
-  _defaultRangeState: 0
+  _isUsingDefaultAttackRange: 1
+  _minAttackRange: 0
+  _maxAttackRange: 0

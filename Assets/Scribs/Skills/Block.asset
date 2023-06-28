@@ -13,17 +13,9 @@ MonoBehaviour:
   m_Name: Block
   m_EditorClassIdentifier: 
   _displayName: Block
-  _isUsingDefaultCooldownTurns: 1
-  _cooldownTurns: 1
   _windUpDurationSeconds: 0.2
   _windUpVarianceSeconds: 0
-  _isEffectIndefinite: 1
-  _effectDurationSeconds: 0
   _windDownDurationSeconds: 0
-  _isInterruptible: 1
-  _isUsingDefaultAttackRange: 1
-  _minAttackRange: 0
-  _maxAttackRange: 0
-  _projectile: {fileID: 0}
-  _spawnProfile: {fileID: 0}
+  _effect: {fileID: 11400000, guid: f19a57d330b50bf42b958a66c38a23a2, type: 2}
   _displayProfile: {fileID: 11400000, guid: 6afd83ac5ef987148bab9745de59583e, type: 2}
+  _cooldownProfile: {fileID: 0}

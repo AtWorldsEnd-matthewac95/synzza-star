@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace AWE.Synzza.Demo {
-    public class DemoNpcMovement : INpcMovement {
+    public class DemoEnemyMovement : INpcMovement {
         public const int MIN_VALID_POSITIONAL_TARGET_COUNT = 2;
 
         private readonly ISceneObject[] _positionalTargets;
@@ -17,12 +17,14 @@ namespace AWE.Synzza.Demo {
             get => _validPositionalTargetCount;
             set => _validPositionalTargetCount = Math.Min(Math.Max(value, MIN_VALID_POSITIONAL_TARGET_COUNT), _positionalTargets.Length);
         }
+        public float Speed { get; set; }
 
-        public DemoNpcMovement(IScene scene, int validPositionalTargetCount, float targetPlayerChance, IEnumerable<ISceneObject> positionalTargets) {
+        public DemoEnemyMovement(IScene scene, int validPositionalTargetCount, float targetPlayerChance, IEnumerable<ISceneObject> positionalTargets, float speed) {
             Scene = scene;
             _positionalTargets = positionalTargets.ToArray();
             ValidPositionalTargetCount = validPositionalTargetCount;
             TargetPlayerChance = targetPlayerChance;
+            Speed = speed;
         }
 
         public ISceneObject PickNewMovementTarget(ISceneObject previousTarget) {
