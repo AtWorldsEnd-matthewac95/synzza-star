@@ -173,6 +173,7 @@ MonoBehaviour:
   _blockSkill: {fileID: 11400000, guid: 7c83fe730201d1e4fa21bef3788656a6, type: 2}
   _attackSkill: {fileID: 11400000, guid: 46b55d08172cb0842835d7b2cc16b7d3, type: 2}
   _staggerProfile: {fileID: 11400000, guid: 928cb037e64f76b44ae10dd2f935399e, type: 2}
+  _invulnerabilityDurationSeconds: 0.2
   _movementSettings:
     _sceneMonocomponent: {fileID: 0}
     _positionalTargets:

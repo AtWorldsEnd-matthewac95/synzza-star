@@ -8,16 +8,17 @@ namespace AWE.Synzza.UnityLayer.Scrib {
         public override bool IsIndefinite => true;
 
         public override bool IsEffectActivatable(IBattlerMonocomponent sourceBattler, IBattlerMonocomponent targetBattler) {
-            float doubleRange = 1.5f * sourceBattler.Battler.DefaultMeleeAttackRange;
+            float range = sourceBattler.Battler.DefaultMeleeAttackRange;
             return sourceBattler.Battler.CurrentStatus == BattlerStatusState.OK
-                && (sourceBattler.transform.position - targetBattler.transform.position).sqrMagnitude < (doubleRange * doubleRange);
+                && (sourceBattler.transform.position - targetBattler.transform.position).sqrMagnitude < (range * range);
         }
 
         protected override IEnumerator CreateEffectCoroutine(IBattlerMonocomponent sourceBattler, IBattlerMonocomponent targetBattler, SkillEffectCoroutine.RunningState state) {
             if (sourceBattler.Battler.ApplyStatusState(BattlerStatusState.Blocking)) {
-                float doubleRange = 1.5f * sourceBattler.Battler.DefaultMeleeAttackRange;
-                float doubleRangeSquared = doubleRange * doubleRange;
-                yield return new WaitWhile(() => (sourceBattler.transform.position - targetBattler.transform.position).sqrMagnitude < doubleRangeSquared);
+                float range = sourceBattler.Battler.DefaultMeleeAttackRange;
+                range *= range;
+                yield return new WaitUntil(() => (sourceBattler.transform.position - targetBattler.transform.position).sqrMagnitude > range);
+                EndEffect(sourceBattler, targetBattler, state);
             }
 
             yield break;

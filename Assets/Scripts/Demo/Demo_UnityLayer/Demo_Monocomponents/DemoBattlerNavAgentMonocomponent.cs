@@ -8,9 +8,11 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
         [SerializeField] protected SkillScrib _blockSkill;
         [SerializeField] protected SkillScrib _attackSkill;
         [SerializeField] protected BattlerStaggerProfileScrib _staggerProfile;
+        [SerializeField] protected float _invulnerabilityDurationSeconds;
 
         protected SkillScrib _currentSkill = null;
         protected SkillEffectCoroutine _runningSkill = null;
+        private bool _isInvulnerable = false;
 
         public abstract Battler Battler { get; }
         public abstract IBattlerMonocomponent BattlerMono { get; }
@@ -43,10 +45,12 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
         protected abstract void OnBattlerBlockingStatusChanged(bool isBlockingNow);
 
         private void OnBattlerStationaryStatusChanged(bool isNowStationary) {
-            _agent.isStopped = isNowStationary;
+            if (_agent.isActiveAndEnabled) {
+                _agent.isStopped = isNowStationary;
 
-            if (_agent.isStopped) {
-                _agent.velocity = Vector3.zero;
+                if (_agent.isStopped) {
+                    _agent.velocity = Vector3.zero;
+                }
             }
         }
 
@@ -156,7 +160,7 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
         }
 
         protected virtual void ReactToAttackHitbox(Collider collider) {
-            if (!collider.CompareTag("Attacks") || !collider.gameObject.TryGetComponent(out SkillHitboxColliderMonocomponent colliderMono) || !colliderMono.IsInitialized) {
+            if (_isInvulnerable || !collider.CompareTag("Attacks") || !collider.gameObject.TryGetComponent(out SkillHitboxColliderMonocomponent colliderMono) || !colliderMono.IsInitialized) {
                 return;
             }
 
@@ -169,15 +173,26 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
             if (sourceBattler.transform.gameObject.TryGetComponent(out NavmeshAgentMonocomponent otherNavAgent)) {
                 otherNavAgent.PickNewDestination();
             }
+            PickNewDestination();
 
             if (Battler.CurrentStatus != BattlerStatusState.Blocking) {
                 Battler.ApplyStatusState(BattlerStatusState.Staggered);
             } else {
                 sourceBattler.Battler.ApplyStatusState(BattlerStatusState.Staggered);
-                if (Battler.CurrentContinuousState == BattlerContinuousState.AutoBlock) {
+                if (Battler.CurrentContinuousState == BattlerContinuousState.AutoCounter) {
+                    Debug.Log($"{BattlerMono.GetType().Name} \"{BattlerMono.transform.gameObject.name}\" blocked an attack in {BattlerContinuousState.AutoCounter}, beginning counterattack.");
+                    _blockSkill.Effect.OnEffectInterrupt(BattlerMono);
                     _currentSkill = _attackSkill;
                 }
             }
+
+            StartCoroutine(CreateInvulnerabilityCoroutine(_invulnerabilityDurationSeconds));
+        }
+
+        private IEnumerator CreateInvulnerabilityCoroutine(float duration) {
+            _isInvulnerable = true;
+            yield return new WaitForSeconds(duration);
+            _isInvulnerable = false;
         }
     }
 }

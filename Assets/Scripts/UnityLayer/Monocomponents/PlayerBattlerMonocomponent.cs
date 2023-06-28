@@ -109,6 +109,13 @@ namespace AWE.Synzza.UnityLayer.Monocomponents {
                 _agent.velocity = Vector3.zero;
                 _agent.enabled = false;
             }
+
+            SetRigidbodyEnabled(!_isCurrentlyNavmeshControlled);
+        }
+
+        private void SetRigidbodyEnabled(bool isEnabled) {
+            _rigidbody.useGravity = isEnabled;
+            _rigidbody.constraints = isEnabled ? RigidbodyConstraints.FreezeRotation : RigidbodyConstraints.FreezeAll;
         }
 
         private void Debug_CheckForContinuousStateChange() {
