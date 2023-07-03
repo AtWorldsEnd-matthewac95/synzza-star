@@ -1,10 +1,9 @@
 ﻿using AWE.Synzza.UnityLayer;
-using AWE.Synzza.UnityLayer.Monocomponents;
 using UnityEngine;
 
-namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
+namespace AWE.Synzza.Demo.UnityLayer {
     public class DemoPlayerMovementMonocomponent : MonoBehaviour {
-        [SerializeField] private EnemyBattlerMonocomponent[] _enemies;
+        [SerializeField] private BattlerMonocomponent[] _enemies;
 
         private int _enemyIndex;
 
@@ -12,13 +11,13 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
             _enemyIndex = Random.Range(0, _enemies.Length);
         }
 
-        public EnemyBattlerMonocomponent GetNextEnemy() {
+        public BattlerMonocomponent GetNextEnemy() {
             _enemyIndex = (_enemyIndex + 1) % _enemies.Length;
 
             if (_enemyIndex < _enemies.Length) {
                 return _enemies[_enemyIndex];
             } else {
-                Debug.LogError($"{GetType().Name} \"{gameObject.name}\" appears to have an empty array of type {typeof(EnemyBattlerMonocomponent).Name}!");
+                Debug.LogError($"{GetType().Name} \"{gameObject.name}\" appears to have an empty array of type {typeof(BattlerMonocomponent).Name}!");
                 return null;
             }
         }

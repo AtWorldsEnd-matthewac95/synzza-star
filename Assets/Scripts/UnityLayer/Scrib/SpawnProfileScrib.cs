@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AWE.Synzza.UnityLayer.Scrib {
+namespace AWE.Synzza.UnityLayer {
     [CreateAssetMenu(fileName = "NewSpawnProfile", menuName = "Scrib/SpawnProfile")]
     public class SpawnProfileScrib : ScriptableObject {
         [Tooltip("World positional offset from the spawner. This value is agnostic of the spawner's rotation.")]
@@ -22,41 +22,15 @@ namespace AWE.Synzza.UnityLayer.Scrib {
         public bool IsIgnoringInheritedXRotation => _isIgnoringInheritedXRotation;
         public bool IsIgnoringInheritedYRotation => _isIgnoringInheritedYRotation;
         public bool IsIgnoringInheritedZRotation => _isIgnoringInheritedZRotation;
-        public bool IsIgnoringAnyInheritedRotation => _isIgnoringInheritedXRotation || _isIgnoringInheritedYRotation || _isIgnoringInheritedZRotation;
 
-        public Vector3 FindSpawnPosition(Transform spawner)
-            => spawner.position
-            + _spawnerPositionalOffset
-            + (_spawnerDirectionalOffsetMagnitudes.x * spawner.right)
-            + (_spawnerDirectionalOffsetMagnitudes.y * spawner.up)
-            + (_spawnerDirectionalOffsetMagnitudes.z * spawner.forward);
-
-        public Vector3 FindSpawnPosition(Transform spawner, in Vector3 positionalOffsetScale)
-            => spawner.position
-            + new Vector3(_spawnerPositionalOffset.x * positionalOffsetScale.x, _spawnerPositionalOffset.y * positionalOffsetScale.y, _spawnerPositionalOffset.z * positionalOffsetScale.z)
-            + (_spawnerDirectionalOffsetMagnitudes.x * spawner.right)
-            + (_spawnerDirectionalOffsetMagnitudes.y * spawner.up)
-            + (_spawnerDirectionalOffsetMagnitudes.z * spawner.forward);
-
-        public Vector3 FindSpawnPosition(Transform spawner, in Vector3 positionalOffsetScale, in Vector3 directionalOffsetScale)
-            => spawner.position
-            + new Vector3(_spawnerPositionalOffset.x * positionalOffsetScale.x, _spawnerPositionalOffset.y * positionalOffsetScale.y, _spawnerPositionalOffset.z * positionalOffsetScale.z)
-            + (_spawnerDirectionalOffsetMagnitudes.x * directionalOffsetScale.x * spawner.right)
-            + (_spawnerDirectionalOffsetMagnitudes.y * directionalOffsetScale.y * spawner.up)
-            + (_spawnerDirectionalOffsetMagnitudes.z * directionalOffsetScale.z * spawner.forward);
-
-        public Vector3 FindSpawnPosition(Transform spawner, float positionalOffsetScale)
-            => spawner.position
-            + (_spawnerPositionalOffset * positionalOffsetScale)
-            + (_spawnerDirectionalOffsetMagnitudes.x * spawner.right)
-            + (_spawnerDirectionalOffsetMagnitudes.y * spawner.up)
-            + (_spawnerDirectionalOffsetMagnitudes.z * spawner.forward);
-
-        public Vector3 FindSpawnPosition(Transform spawner, float positionalOffsetScale, float directionalOffsetScale)
-            => spawner.position
-            + (_spawnerPositionalOffset * positionalOffsetScale)
-            + (_spawnerDirectionalOffsetMagnitudes.x * directionalOffsetScale * spawner.right)
-            + (_spawnerDirectionalOffsetMagnitudes.y * directionalOffsetScale * spawner.up)
-            + (_spawnerDirectionalOffsetMagnitudes.z * directionalOffsetScale * spawner.forward);
+        public SpawnProfile ToSpawnProfile(byte id) => new(
+            id,
+            _spawnerPositionalOffset.ToFloat3(),
+            _spawnerDirectionalOffsetMagnitudes.ToFloat3(),
+            _isInheritingSpawnerRotation,
+            _isIgnoringInheritedXRotation,
+            _isIgnoringInheritedYRotation,
+            _isIgnoringInheritedZRotation
+        );
     }
 }

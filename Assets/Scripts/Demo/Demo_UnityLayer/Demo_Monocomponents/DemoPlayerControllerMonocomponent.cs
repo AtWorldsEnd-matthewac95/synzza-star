@@ -1,27 +1,23 @@
-﻿using AWE.Synzza.Demo.UnityLayer.Monocomponents;
-using AWE.Synzza.UnityLayer.Monocomponents.UI;
-using AWE.Synzza.UnityLayer.Scrib;
+﻿using AWE.Synzza.UnityLayer;
 using UnityEngine;
 
-namespace AWE.Synzza.UnityLayer.Monocomponents {
+namespace AWE.Synzza.Demo.UnityLayer {
     [RequireComponent(typeof(Rigidbody))]
     [RequireComponent(typeof(DemoPlayerMovementMonocomponent))]
-    public class PlayerBattlerMonocomponent : DemoBattlerNavAgentMonocomponent, IBattlerMonocomponent {
+    [RequireComponent(typeof(BattlerMonocomponent))]
+    public class DemoPlayerControllerMonocomponent : DemoBattlerNavAgentMonocomponent {
         [SerializeField] private float _speed;
-        [SerializeField] private SkillScrib _attack;
-        [SerializeField] private SkillScrib _block;
-        [SerializeField] private BattlerScrib _battler;
-        [SerializeField] private BattlerContinuousState _continuousState;
-        [SerializeField] private BattlerStatusUI _statusText;
+        [SerializeField] private BattlerMeleeRules _continuousState;
 
         [SerializeField] private bool _isCurrentlyNavmeshControlled = false;
 
         private Rigidbody _rigidbody;
         private DemoPlayerMovementMonocomponent _movement;
+        private BattlerMonocomponent _battler;
 
         public Battler PlayerBattler { get; private set; }
         public override Battler Battler => PlayerBattler;
-        public override IBattlerMonocomponent BattlerMono => this;
+        public override BattlerMonocomponent BattlerMono => _battler;
         public string DisplayName => PlayerBattler.DisplayName;
         public bool IsCurrentlyNavmeshControlled => _isCurrentlyNavmeshControlled;
 
@@ -29,27 +25,21 @@ namespace AWE.Synzza.UnityLayer.Monocomponents {
             base.Awake();
             _agent.speed = _speed;
 
-            PlayerBattler = _battler.ToBattler(BattlerTeam.Players);
-            PlayerBattler.CurrentContinuousState = BattlerContinuousState.AutoCounter;
-
             _rigidbody = GetComponent<Rigidbody>();
             _movement = GetComponent<DemoPlayerMovementMonocomponent>();
+            _battler = GetComponent<BattlerMonocomponent>();
+            PlayerBattler = _battler.Battler;
+            var name = PlayerBattler?.DisplayName ?? "null";
+            Debug.Log($"Player is \"{name}\"");
 
             SetIsCurrentlyNavmeshControlled(false, isAllowingEarlyReturn: false);
-
-            if (_statusText != null) { _statusText.BattlerMono = this; }
-        }
-
-        protected override void Start() {
-            PlayerBattler.CurrentContinuousState = BattlerContinuousState.AutoBlock;
-            base.Start();
         }
 
         protected override void OnBattlerBlockingStatusChanged(bool isBlockingNow) {
             _agent.speed = isBlockingNow ? _speed / 4f : _speed;
         }
 
-        internal override void PickNewDestination() {
+        protected override void PickNewDestination() {
             var enemy = _movement.GetNextEnemy();
             _currentTarget = new UnitySceneObject(enemy.transform);
             _currentTargetTransform = enemy.transform;
@@ -63,11 +53,6 @@ namespace AWE.Synzza.UnityLayer.Monocomponents {
             if (_isCurrentlyNavmeshControlled) {
 
                 base.Update();
-                /*
-                var speed = Time.deltaTime * _speed;
-                var delta = new Vector3(speed * Input.GetAxis("Horizontal"), 0f, speed * Input.GetAxis("Vertical"));
-                _agent.Move(delta);
-                */
             }
         }
 
@@ -125,15 +110,15 @@ namespace AWE.Synzza.UnityLayer.Monocomponents {
         protected override void UpdateContinuousState() {
             if (Input.GetKeyDown(KeyCode.Alpha1)) {
                 SetIsCurrentlyNavmeshControlled(true);
-                Battler.CurrentContinuousState = BattlerContinuousState.AutoAttack;
+                Battler.CurrentMeleeRules = BattlerMeleeRules.AutoAttack;
                 Debug.Log("Setting to Auto Attack.");
             } else if (Input.GetKeyDown(KeyCode.Alpha2)) {
                 SetIsCurrentlyNavmeshControlled(true);
-                Battler.CurrentContinuousState = BattlerContinuousState.AutoCounter;
+                Battler.CurrentMeleeRules = BattlerMeleeRules.AutoCounter;
                 Debug.Log("Setting to Auto Counter.");
             } else if (Input.GetKeyDown(KeyCode.Alpha3)) {
                 SetIsCurrentlyNavmeshControlled(true);
-                Battler.CurrentContinuousState = BattlerContinuousState.OpportuneAttack;
+                Battler.CurrentMeleeRules = BattlerMeleeRules.OpportuneAttack;
                 Debug.Log("Setting to Opportune Attack.");
             }
         }
@@ -141,7 +126,7 @@ namespace AWE.Synzza.UnityLayer.Monocomponents {
         protected override void ReactToAttackHitbox(Collider collider) {
             base.ReactToAttackHitbox(collider);
 
-            if (!_isCurrentlyNavmeshControlled && (Battler?.CurrentStatus ?? BattlerStatusState.OK) == BattlerStatusState.Staggered) {
+            if (!_isCurrentlyNavmeshControlled && (Battler?.Status.Current ?? BattlerStatusState.OK) == BattlerStatusState.Staggered) {
                 SetIsCurrentlyNavmeshControlled(true);
             }
         }

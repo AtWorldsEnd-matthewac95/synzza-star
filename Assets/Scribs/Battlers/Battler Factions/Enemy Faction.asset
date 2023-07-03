@@ -9,8 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c694d7d282ac0cc4b8ea6bfc6c45be3e, type: 3}
-  m_Name: Uses Default Cooldown
+  m_Script: {fileID: 11500000, guid: 059d612de2ef3cc4a896dcd5e0227204, type: 3}
+  m_Name: Enemy Faction
   m_EditorClassIdentifier: 
-  _isUsingDefaultCooldownTurns: 1
-  _cooldownTurns: 1
+  _id: 2
+  _displayName: Enemy
+  _isFriendly: 0
+  _isHostile: 1

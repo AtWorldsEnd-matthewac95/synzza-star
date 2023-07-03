@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f332a2924652f624e9c9a14f2e034459, type: 3}
   m_Name: Melee Attack
   m_EditorClassIdentifier: 
+  _ID: 2
   _displayName: Melee Attack
   _windUpDurationSeconds: 1
   _windUpVarianceSeconds: 0
   _windDownDurationSeconds: 1
   _effect: {fileID: 11400000, guid: a0f8b74c63db1dc4cb66024edf883b23, type: 2}
   _displayProfile: {fileID: 11400000, guid: 6afd83ac5ef987148bab9745de59583e, type: 2}
-  _cooldownProfile: {fileID: 0}
+  _cooldownProfile: {fileID: 11400000, guid: dba584f1828c47f43b0fb29d3fd39978, type: 2}

@@ -1,123 +1,70 @@
 ﻿using System;
+using System.Reflection;
 
 namespace AWE.Synzza {
-    public enum BattlerTeam : byte {
-        Enemies = 0,
-        Players
+    public enum BattlerMeleeRules : byte {
+        AutoBlock,
+        AutoAttack,
+        AutoCounter,
+        OpportuneAttack
     }
 
     public class Battler {
-        public BattlerTeam Team { get; }
-        public string DisplayName { get; }
-        public int DefaultSkillCooldown { get; }
-        public float DefaultMeleeAttackRange { get; }
-        public BattlerContinuousState DefaultMeleeState { get; }
-        public BattlerContinuousState DefaultRangeState { get; }
+        public byte FactionID { get; private set; }
 
-        private readonly BattlerStatus _status = new();
+        public void SetFaction(in BattlerFaction faction) => SetFaction(faction.ID, faction.DisplayName);
+        public void SetFaction(byte factionId) => SetFaction(factionId, string.Empty);
+        private void SetFaction(byte factionId, string factionName) {
+            if (!SynzzaGame.Current.BattlerFactions.IsRegistered(factionId)) {
+                var factionNameString = string.IsNullOrWhiteSpace(factionName) ? string.Empty : $" \"{factionName}\"";
+                throw new ArgumentException($"{GetType().Name} \"{DisplayName}\" attempted to set its faction to an unregistered faction{factionNameString}!");
+            }
 
-        public BattlerStatusState CurrentStatus => _status.MainState;
-        public bool IsVulnerable => _status.IsVulnerable;
+            FactionID = factionId;
+        }
 
-        public delegate void ContinuousStateUpdateDelegate(bool isSameState, BattlerContinuousState newState);
-        public event ContinuousStateUpdateDelegate OnUpdateContinuousState;
+        public string DisplayName { get; private set; }
+        public uint InnateSkillCooldown { get; private set; }
+        public float InnateMeleeAttackRange { get; private set; }
+        public BattlerMeleeRules InnateMeleeRules { get; }
+        public BattlerStatus Status { get; }
+        public BattlerStaggerProfile StaggerProfile { get; }
 
-        private BattlerContinuousState _currentContinuousState;
-        public BattlerContinuousState CurrentContinuousState {
-            get => _currentContinuousState;
+        public delegate void MeleeRulesUpdateDelegate(bool isSameRules, BattlerMeleeRules newRules);
+        public event MeleeRulesUpdateDelegate OnUpdateMeleeRules;
+
+        private BattlerMeleeRules _currentMeleeRules;
+        public BattlerMeleeRules CurrentMeleeRules {
+            get => _currentMeleeRules;
             set {
-                bool isSameState = _currentContinuousState == value;
-                _currentContinuousState = value;
-                OnUpdateContinuousState?.Invoke(isSameState, _currentContinuousState);
+                bool isSameState = _currentMeleeRules == value;
+                _currentMeleeRules = value;
+                OnUpdateMeleeRules?.Invoke(isSameState, _currentMeleeRules);
             }
         }
 
-        public delegate void CancelEffectsDelegate();
-        public event CancelEffectsDelegate OnCancelEffects;
+        public event SkillEffectCancelledDelegate OnSkillEffectCancelled;
 
-        public delegate void WindDownEffectDelegate();
-        public event WindDownEffectDelegate OnWindDown;
-
-        public delegate void BlockStatusChangedDelegate(bool isNowBlocking);
-        public event BlockStatusChangedDelegate OnBlockStatusChanged;
-
-        public delegate void StationaryStatusChangedDelegate(bool isNowStationary);
-        public event StationaryStatusChangedDelegate OnStationaryStatusChanged;
-
-        public Battler(
-            BattlerTeam team,
-            string displayName,
-            int defaultSkillCooldown,
-            float defaultMeleeAttackRange,
-            BattlerContinuousState defaultMeleeState = BattlerContinuousState.AutoBlock,
-            BattlerContinuousState defaultRangeState = BattlerContinuousState.AutoBlock
-        ) {
-            Team = team;
+        public Battler(string displayName, uint innateSkillCooldown, float innateMeleeAttackRange, BattlerStaggerProfile staggerProfile, BattlerMeleeRules innateMeleeRules = BattlerMeleeRules.AutoBlock) {
             DisplayName = displayName;
-            DefaultSkillCooldown = defaultSkillCooldown;
-            DefaultMeleeAttackRange = defaultMeleeAttackRange;
-            DefaultMeleeState = defaultMeleeState;
-            DefaultRangeState = defaultRangeState;
+            InnateSkillCooldown = Math.Max(innateSkillCooldown, 1);
+            InnateMeleeAttackRange = Math.Max(innateMeleeAttackRange, 0f);
+            InnateMeleeRules = innateMeleeRules;
+            CurrentMeleeRules = InnateMeleeRules;
+            StaggerProfile = staggerProfile;
+
+            Status = new();
+            Status.OnStaggerApplied += OnStaggerApplied;
+
+            FactionID = BattlerFaction.ID_NONE;
         }
 
-        public bool ApplyStatusState(BattlerStatusState state) {
-            if (state == BattlerStatusState.SkillWindDown && _status.MainState != BattlerStatusState.SkillEffect) {
-                return false;
+        private void OnStaggerApplied() {
+            if (Status.Current != BattlerStatusState.Staggered) {
+                throw new InvalidOperationException($"{GetType().Name} \"{DisplayName}\" attempted to run {MethodBase.GetCurrentMethod().Name} when its status was {Status.Current}!");
             }
 
-            if (state == _status.MainState) {
-                return true;
-            }
-
-            _status.MainState = state;
-
-            OnBlockStatusChanged?.Invoke(isNowBlocking: _status.MainState == BattlerStatusState.Blocking);
-
-            switch (_status.MainState) {
-
-                case BattlerStatusState.OK:
-                case BattlerStatusState.Blocking:
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: false);
-                    break;
-
-                case BattlerStatusState.Staggered:
-                    OnCancelEffects?.Invoke();
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: true);
-                    break;
-
-                case BattlerStatusState.SkillWindDown:
-                    OnWindDown?.Invoke();
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: true);
-                    break;
-
-                case BattlerStatusState.SkillEffect:
-                case BattlerStatusState.SkillWindUp:
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: true);
-                    break;
-
-            }
-
-            return true;
-        }
-
-        public bool RemoveStatusState(BattlerStatusState stateToRemove) {
-            if (stateToRemove == BattlerStatusState.OK) {
-                return false;
-            }
-
-            bool isRemovingState = stateToRemove == _status.MainState;
-            bool isRemovingBlock = _status.MainState == BattlerStatusState.Blocking;
-
-            if (isRemovingState) {
-                _status.MainState = BattlerStatusState.OK;
-                OnStationaryStatusChanged?.Invoke(isNowStationary: false);
-
-                if (isRemovingBlock) {
-                    OnBlockStatusChanged?.Invoke(isNowBlocking: false);
-                }
-            }
-
-            return isRemovingState;
+            OnSkillEffectCancelled?.Invoke(BattlerStatusState.Staggered);
         }
     }
 }

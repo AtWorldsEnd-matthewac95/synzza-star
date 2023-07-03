@@ -1,21 +1,6 @@
-﻿namespace AWE.Synzza {
-    public struct float3 {
-        public float x { get; }
-        public float y { get; }
-        public float z { get; }
+﻿using System.Collections.Generic;
 
-        public float3(float X, float Y, float Z) { x = X; y = Y; z = Z; }
-    }
-
-    public struct float4 {
-        public float x { get; }
-        public float y { get; }
-        public float z { get; }
-        public float w { get; }
-
-        public float4(float X, float Y, float Z, float W) { x = X; y = Y; z = Z; w = W; }
-    }
-
+namespace AWE.Synzza {
     public interface ISceneObject {
         float3 LocalPosition { get; }
         float3 WorldPosition { get; }
@@ -26,5 +11,17 @@
         float3 LocalScale { get; }
         float3 WorldScale { get; }
         bool IsMobile { get; }
+        float3 WorldForward { get; }
+        float3 WorldRight { get; }
+        float3 WorldUp { get; }
+
+        void StartCoroutine(in IEnumerator<ICoWait> coroutine);
+    }
+
+    public interface IBattlerSceneObject : ISceneObject {
+        Battler Battler { get; }
+        SkillUsage CurrentSkillUsage { get; }
+
+        bool TrySetCurrentSkillUsage(SkillUsage usage);
     }
 }

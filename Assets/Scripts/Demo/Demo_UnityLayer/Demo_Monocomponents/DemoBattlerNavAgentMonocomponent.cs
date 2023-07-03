@@ -1,24 +1,22 @@
-﻿using AWE.Synzza.UnityLayer.Monocomponents;
-using AWE.Synzza.UnityLayer.Scrib;
+﻿using AWE.Synzza.UnityLayer;
 using System.Collections;
 using UnityEngine;
 
-namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
+namespace AWE.Synzza.Demo.UnityLayer {
     public abstract class DemoBattlerNavAgentMonocomponent : NavmeshAgentMonocomponent {
         [SerializeField] protected SkillScrib _blockSkill;
         [SerializeField] protected SkillScrib _attackSkill;
-        [SerializeField] protected BattlerStaggerProfileScrib _staggerProfile;
         [SerializeField] protected float _invulnerabilityDurationSeconds;
 
         protected SkillScrib _currentSkill = null;
-        protected SkillEffectCoroutine _runningSkill = null;
+        protected SkillEffectScribCoroutine _runningSkill = null;
         private bool _isInvulnerable = false;
 
         public abstract Battler Battler { get; }
-        public abstract IBattlerMonocomponent BattlerMono { get; }
+        public abstract BattlerMonocomponent BattlerMono { get; }
 
-        private IBattlerMonocomponent _targetBattler;
-        protected IBattlerMonocomponent TargetBattler {
+        private BattlerMonocomponent _targetBattler;
+        protected BattlerMonocomponent TargetBattler {
             get => _targetBattler;
             set {
                 _targetBattler = value;
@@ -35,11 +33,11 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
         protected override void Start() {
             base.Start();
 
-            Battler.OnCancelEffects += OnBattlerCancelEffects;
-            Battler.OnUpdateContinuousState += OnBattlerUpdateContinuousState;
-            Battler.OnWindDown += OnBattlerWindDown;
-            Battler.OnBlockStatusChanged += OnBattlerBlockingStatusChanged;
-            Battler.OnStationaryStatusChanged += OnBattlerStationaryStatusChanged;
+            Battler.OnSkillEffectCancelled += OnBattlerCancelEffects;
+            Battler.OnUpdateMeleeRules += OnBattlerUpdateMeleeRules;
+            Battler.Status.OnSkillWindDown += OnBattlerWindDown;
+            Battler.Status.OnBlockStatusChanged += OnBattlerBlockingStatusChanged;
+            Battler.Status.OnStationaryStatusChanged += OnBattlerStationaryStatusChanged;
         }
 
         protected abstract void OnBattlerBlockingStatusChanged(bool isBlockingNow);
@@ -54,7 +52,7 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
             }
         }
 
-        private void OnBattlerCancelEffects() {
+        private void OnBattlerCancelEffects(BattlerStatusState cancellingStatus) {
             _currentSkill.Effect.OnEffectInterrupt(BattlerMono, _runningSkill?.State);
 
             if (_runningSkill != null) {
@@ -63,13 +61,13 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
 
             _runningSkill = null;
 
-            if (Battler.CurrentContinuousState == BattlerContinuousState.AutoCounter) {
+            if (Battler.CurrentMeleeRules == BattlerMeleeRules.AutoCounter) {
                 _currentSkill = _blockSkill;
             }
 
-            if (Battler.CurrentStatus == BattlerStatusState.Staggered) {
+            if (cancellingStatus == BattlerStatusState.Staggered) {
                 StopAllCoroutines();
-                StartCoroutine(CreateStaggerCoroutine(_staggerProfile == null ? 0f : _staggerProfile.DurationSeconds));
+                StartCoroutine(CreateStaggerCoroutine(Battler.StaggerProfile.DurationSeconds));
             }
         }
 
@@ -77,7 +75,7 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
             StartCoroutine(CreateWindDownCoroutine(_runningSkill.State.WindDownDuration));
         }
 
-        private void OnBattlerUpdateContinuousState(bool isSameState, BattlerContinuousState newState) {
+        private void OnBattlerUpdateMeleeRules(bool isSameState, BattlerMeleeRules newState) {
             if (isSameState) {
                 return;
             }
@@ -88,13 +86,13 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
 
             switch (newState) {
 
-                case BattlerContinuousState.AutoBlock:
-                case BattlerContinuousState.AutoCounter:
+                case BattlerMeleeRules.AutoBlock:
+                case BattlerMeleeRules.AutoCounter:
                     _currentSkill = _blockSkill;
                     break;
 
-                case BattlerContinuousState.AutoAttack:
-                case BattlerContinuousState.OpportuneAttack:
+                case BattlerMeleeRules.AutoAttack:
+                case BattlerMeleeRules.OpportuneAttack:
                     _currentSkill = _attackSkill;
                     break;
 
@@ -104,35 +102,36 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
         protected abstract void UpdateContinuousState();
 
         private IEnumerator CreateSkillCoroutine() {
-            _runningSkill = _currentSkill.Effect.ActivateEffect(BattlerMono, _targetBattler, _currentSkill.WindDownDurationSeconds);
-            Battler.ApplyStatusState(BattlerStatusState.SkillWindUp);
+            _runningSkill = _currentSkill.Effect.CreateEffectCoroutine(BattlerMono, _targetBattler, _currentSkill.WindDownDurationSeconds);
+            var status = Battler.Status;
+            status.ApplyState(BattlerStatusState.SkillWindUp);
 
             if (_runningSkill.Coroutine != null) {
                 Debug.Log($"{GetType().Name} \"{gameObject.name}\" created the skill successfully.");
 
                 yield return new WaitForSeconds(_currentSkill.WindUpDurationSeconds);
-                Battler.ApplyStatusState(BattlerStatusState.SkillEffect);
+                status.ApplyState(BattlerStatusState.SkillEffect);
                 StartCoroutine(_runningSkill.Coroutine);
             } else {
                 Debug.Log($"{GetType().Name} \"{gameObject.name}\" failed to create the skill.");
 
-                Battler.RemoveStatusState(BattlerStatusState.SkillWindUp);
+                status.RemoveState(BattlerStatusState.SkillWindUp);
                 yield break;
             }
         }
 
         private IEnumerator CreateWindDownCoroutine(float windDownDurationSeconds) {
-            if (Battler.CurrentContinuousState == BattlerContinuousState.AutoCounter) {
+            if (Battler.CurrentMeleeRules == BattlerMeleeRules.AutoCounter) {
                 _currentSkill = _blockSkill;
             }
             yield return new WaitForSeconds(windDownDurationSeconds);
-            Battler.RemoveStatusState(BattlerStatusState.SkillWindDown);
+            Battler.Status.RemoveState(BattlerStatusState.SkillWindDown);
             _runningSkill = null;
         }
 
         private IEnumerator CreateStaggerCoroutine(float staggerDurationSeconds) {
             yield return new WaitForSeconds(staggerDurationSeconds);
-            Battler.RemoveStatusState(BattlerStatusState.Staggered);
+            Battler.Status.RemoveState(BattlerStatusState.Staggered);
         }
 
         protected override void Update() {
@@ -142,20 +141,18 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
                 return;
             }
 
-            bool isOpportune = Battler.CurrentContinuousState != BattlerContinuousState.OpportuneAttack || _targetBattler.Battler.IsVulnerable;
+            bool isOpportune = Battler.CurrentMeleeRules != BattlerMeleeRules.OpportuneAttack || _targetBattler.Battler.Status.IsVulnerable;
 
             if (isOpportune && _currentSkill.Effect.IsEffectActivatable(BattlerMono, _targetBattler)) {
                 StartCoroutine(CreateSkillCoroutine());
             }
         }
 
-        protected override void OnCollisionEnter(Collision collision) {
-            base.OnCollisionEnter(collision);
+        protected virtual void OnCollisionEnter(Collision collision) {
             ReactToAttackHitbox(collision.collider);
         }
 
-        protected override void OnTriggerEnter(Collider other) {
-            base.OnTriggerEnter(other);
+        protected virtual void OnTriggerEnter(Collider other) {
             ReactToAttackHitbox(other);
         }
 
@@ -166,21 +163,21 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
 
             var sourceBattler = colliderMono.Parent.SourceBattler;
 
-            if (sourceBattler.Battler.Team == Battler.Team) {
+            if (sourceBattler.Battler.FactionID == Battler.FactionID) {
                 return;
             }
 
-            if (sourceBattler.transform.gameObject.TryGetComponent(out NavmeshAgentMonocomponent otherNavAgent)) {
+            if (sourceBattler.transform.gameObject.TryGetComponent(out DemoBattlerNavAgentMonocomponent otherNavAgent)) {
                 otherNavAgent.PickNewDestination();
             }
             PickNewDestination();
 
-            if (Battler.CurrentStatus != BattlerStatusState.Blocking) {
-                Battler.ApplyStatusState(BattlerStatusState.Staggered);
+            if (Battler.Status.Current != BattlerStatusState.Blocking) {
+                Battler.Status.ApplyState(BattlerStatusState.Staggered);
             } else {
-                sourceBattler.Battler.ApplyStatusState(BattlerStatusState.Staggered);
-                if (Battler.CurrentContinuousState == BattlerContinuousState.AutoCounter) {
-                    Debug.Log($"{BattlerMono.GetType().Name} \"{BattlerMono.transform.gameObject.name}\" blocked an attack in {BattlerContinuousState.AutoCounter}, beginning counterattack.");
+                sourceBattler.Battler.Status.ApplyState(BattlerStatusState.Staggered);
+                if (Battler.CurrentMeleeRules == BattlerMeleeRules.AutoCounter) {
+                    Debug.Log($"{BattlerMono.GetType().Name} \"{BattlerMono.transform.gameObject.name}\" blocked an attack in {BattlerMeleeRules.AutoCounter}, beginning counterattack.");
                     _blockSkill.Effect.OnEffectInterrupt(BattlerMono);
                     _currentSkill = _attackSkill;
                 }

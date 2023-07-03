@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 using AWE.Synzza.UnityLayer;
-using AWE.Synzza.Demo.UnityLayer.Monocomponents;
+using AWE.Synzza.Demo.UnityLayer;
 
 namespace AWE.Synzza.Demo.UnityLayer {
     [Serializable]

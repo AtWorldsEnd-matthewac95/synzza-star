@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AWE.Synzza.UnityLayer.Scrib {
+namespace AWE.Synzza.UnityLayer {
     [CreateAssetMenu(fileName = "NewSkillEffectDurationProfile", menuName = "Scrib/SkillEffectDurationProfile")]
     public class SkillEffectDurationProfileScrib : ScriptableObject {
         [SerializeField] private bool _isIndefinite;

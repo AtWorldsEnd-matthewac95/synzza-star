@@ -1,14 +1,14 @@
 ﻿using Unity.VisualScripting;
 using UnityEngine;
 
-namespace AWE.Synzza.UnityLayer.Monocomponents {
+namespace AWE.Synzza.UnityLayer {
     public class SkillHitboxMonocomponent : MonoBehaviour {
         private bool _isInitialized = false;
 
         public bool IsInitialized => _isInitialized;
-        public IBattlerMonocomponent SourceBattler { get; private set; }
+        public BattlerMonocomponent SourceBattler { get; private set; }
 
-        public void Initialize(IBattlerMonocomponent source) {
+        public void Initialize(BattlerMonocomponent source) {
             if (_isInitialized) {
                 Debug.LogError($"{GetType().Name} \"{gameObject.name}\" attempted to be initialized more than once!");
                 return;

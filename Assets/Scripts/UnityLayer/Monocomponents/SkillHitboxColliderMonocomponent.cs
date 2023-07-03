@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AWE.Synzza.UnityLayer.Monocomponents {
+namespace AWE.Synzza.UnityLayer {
     [RequireComponent(typeof(Collider))]
     public class SkillHitboxColliderMonocomponent : MonoBehaviour {
         private bool _isInitialized = false;

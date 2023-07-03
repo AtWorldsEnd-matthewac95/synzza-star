@@ -18,4 +18,4 @@ MonoBehaviour:
   _windDownDurationSeconds: 0
   _effect: {fileID: 11400000, guid: f19a57d330b50bf42b958a66c38a23a2, type: 2}
   _displayProfile: {fileID: 11400000, guid: 6afd83ac5ef987148bab9745de59583e, type: 2}
-  _cooldownProfile: {fileID: 0}
+  _cooldownProfile: {fileID: 11400000, guid: dba584f1828c47f43b0fb29d3fd39978, type: 2}

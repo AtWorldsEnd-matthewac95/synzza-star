@@ -13,9 +13,8 @@ GameObject:
   - component: {fileID: 1827725025297540593}
   - component: {fileID: 1827725025297540592}
   - component: {fileID: 1827725025297540595}
-  - component: {fileID: 1827725025297540588}
-  - component: {fileID: 2801352658361182470}
   - component: {fileID: 223442338871660633}
+  - component: {fileID: 2881848242279149087}
   - component: {fileID: 7398565790074048751}
   m_Layer: 0
   m_Name: Enemy
@@ -118,45 +117,12 @@ NavMeshAgent:
   m_AngularSpeed: 120
   m_StoppingDistance: 0
   m_AutoTraverseOffMeshLink: 0
-  m_AutoBraking: 1
+  m_AutoBraking: 0
   m_AutoRepath: 0
   m_Height: 1
   m_BaseOffset: 0.5
   m_WalkableMask: 4294967295
   m_ObstacleAvoidanceType: 1
---- !u!114 &1827725025297540588
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1827725025297540597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3618e4da374544646af71aadba6ddb4b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _battler: {fileID: 11400000, guid: c3ac8b8c97dd8024293bbacb70b30a33, type: 2}
-  _statusText: {fileID: 0}
---- !u!114 &2801352658361182470
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1827725025297540597}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b33dc2d2c907ffc4f89037aeadc1e55c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  WorldGameCamera: {fileID: 0}
-  _rightWorldOffset: 1
-  _topWorldOffset: 1
-  _forwardWorldOffset: 1
-  _leftWorldOffset: 1
-  _bottomWorldOffset: 1
-  _backwardWorldOffset: 1
 --- !u!114 &223442338871660633
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -169,7 +135,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 808697874c7dc6f4d947bf5117b9d02e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isChangingTargetOnCollision: 0
   _blockSkill: {fileID: 11400000, guid: 7c83fe730201d1e4fa21bef3788656a6, type: 2}
   _attackSkill: {fileID: 11400000, guid: 46b55d08172cb0842835d7b2cc16b7d3, type: 2}
   _staggerProfile: {fileID: 11400000, guid: 928cb037e64f76b44ae10dd2f935399e, type: 2}
@@ -189,6 +154,21 @@ MonoBehaviour:
     _targetPlayerChance: 0.4
     _speed: 3.5
   _battlerMonocomponent: {fileID: 0}
+--- !u!114 &2881848242279149087
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1827725025297540597}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ccbc0f8a87f37ad47a931fd4245469c3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _battler: {fileID: 11400000, guid: c3ac8b8c97dd8024293bbacb70b30a33, type: 2}
+  _faction: {fileID: 11400000, guid: e5428acfe135d5f4eb99126c2b498b2a, type: 2}
+  _statusText: {fileID: 0}
 --- !u!54 &7398565790074048751
 Rigidbody:
   m_ObjectHideFlags: 0

@@ -1,7 +1,7 @@
 ﻿using TMPro;
 using UnityEngine;
 
-namespace AWE.Synzza.UnityLayer.Monocomponents {
+namespace AWE.Synzza.UnityLayer {
     public class CameraFollowMonocomponent : MonoBehaviour {
         [SerializeField] private Transform _followThis;
 

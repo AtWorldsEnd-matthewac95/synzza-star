@@ -1,18 +1,17 @@
 ﻿using AWE.Synzza.UnityLayer;
-using AWE.Synzza.UnityLayer.Monocomponents;
 using UnityEngine;
 
-namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
+namespace AWE.Synzza.Demo.UnityLayer {
     public class DemoEnemyNavAgentMonocomponent : DemoBattlerNavAgentMonocomponent {
         [Tooltip("Settings for this agent's movement")]
         [SerializeField] private DemoEnemyMovementSerializable _movementSettings;
         [Tooltip("Needed to make this enemy attack and block")]
-        [SerializeField] private EnemyBattlerMonocomponent _battlerMonocomponent;
+        [SerializeField] private BattlerMonocomponent _battlerMonocomponent;
 
         private DemoEnemyMovement _movement = null;
 
         public override Battler Battler => _battlerMonocomponent.Battler;
-        public override IBattlerMonocomponent BattlerMono => _battlerMonocomponent;
+        public override BattlerMonocomponent BattlerMono => _battlerMonocomponent;
 
         protected override void Awake() {
             if (_battlerMonocomponent == null) {
@@ -26,7 +25,7 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
         }
 
         protected override void Start() {
-            Battler.CurrentContinuousState = BattlerContinuousState.OpportuneAttack;
+            Battler.CurrentMeleeRules = BattlerMeleeRules.OpportuneAttack;
             base.Start();
         }
 
@@ -39,14 +38,14 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
             PickNewDestination();
         }
 
-        internal override void PickNewDestination() {
+        protected override void PickNewDestination() {
             _currentTarget = _movement.PickNewMovementTarget(_currentTarget);
             _currentTargetTransform = _currentTarget is UnitySceneObject currentTargetTransform ? currentTargetTransform.transform : null;
 
             if (_currentTargetTransform != null) {
                 _agent.SetDestination(_currentTargetTransform.position);
 
-                if (_currentTargetTransform.gameObject.TryGetComponent(out PlayerBattlerMonocomponent targetBattler)) {
+                if (_currentTargetTransform.gameObject.TryGetComponent(out BattlerMonocomponent targetBattler)) {
                     TargetBattler = targetBattler;
                 }
             }
@@ -55,7 +54,7 @@ namespace AWE.Synzza.Demo.UnityLayer.Monocomponents {
         }
 
         protected override void UpdateContinuousState() {
-            Battler.CurrentContinuousState = _currentTarget?.IsMobile ?? false ? BattlerContinuousState.AutoAttack : BattlerContinuousState.OpportuneAttack;
+            Battler.CurrentMeleeRules = _currentTarget?.IsMobile ?? false ? BattlerMeleeRules.AutoAttack : BattlerMeleeRules.OpportuneAttack;
         }
     }
 }

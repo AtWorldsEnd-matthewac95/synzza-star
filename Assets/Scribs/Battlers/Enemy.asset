@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Enemy
   m_EditorClassIdentifier: 
   _displayName: An Enemy
-  _defaultSkillCooldown: 1
-  _defaultMeleeAttackRange: 1
-  _defaultMeleeState: 0
-  _defaultRangeState: 0
+  _innateSkillCooldown: 1
+  _innateMeleeAttackRange: 1
+  _innateMeleeRules: 0
+  _staggerProfile: {fileID: 11400000, guid: 928cb037e64f76b44ae10dd2f935399e, type: 2}
