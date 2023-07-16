@@ -10,8 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ff55a4b237d38447bb1237dc27b8835, type: 3}
-  m_Name: Forward Spawn Profile
+  m_Name: Forward Spawn Location Profile
   m_EditorClassIdentifier: 
+  _id: 1
   _spawnerPositionalOffset: {x: 0, y: 0, z: 0}
   _spawnerDirectionalOffsetMagnitudes: {x: 0, y: 0, z: 1}
   _isInheritingSpawnerRotation: 1

@@ -40,7 +40,7 @@ namespace AWE.Synzza.Demo.UnityLayer {
 
         protected override void PickNewDestination() {
             _currentTarget = _movement.PickNewMovementTarget(_currentTarget);
-            _currentTargetTransform = _currentTarget is UnitySceneObject currentTargetTransform ? currentTargetTransform.transform : null;
+            _currentTargetTransform = _currentTarget is UnityWorldObject currentTargetTransform ? currentTargetTransform.transform : null;
 
             if (_currentTargetTransform != null) {
                 _agent.SetDestination(_currentTargetTransform.position);

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _isInterruptible: 0
   _hitbox: {fileID: 4207812878194664312, guid: 95c77aa4fede2384aaa10a2047cc60c6, type: 3}
-  _hitboxSpawnProfile: {fileID: 11400000, guid: cec02154fac7df24294e3b4a3a8ab05e,
+  _hitboxSpawnLocationProfile: {fileID: 11400000, guid: cec02154fac7df24294e3b4a3a8ab05e,
     type: 2}
   _effectDurationProfile: {fileID: 11400000, guid: ce9772fac7b99fc4394cd1f4a8598666,
     type: 2}

@@ -16,9 +16,6 @@ namespace AWE.Synzza.UnityLayer {
 
         public BattlerFactionID ID => _id;
         public byte ByteID => (byte)_id;
-        public string Displayname => _displayName;
-        public bool IsFriendly => _isFriendly;
-        public bool IsHostile => _isHostile;
 
         public BattlerFaction ToBattlerFaction() => new(ByteID, _displayName, _isFriendly, _isHostile);
     }

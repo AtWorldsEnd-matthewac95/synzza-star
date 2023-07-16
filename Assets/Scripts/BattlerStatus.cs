@@ -9,6 +9,16 @@
         Blocking
     }
 
+    public static class BattlerStatusStateExtensions {
+        public static bool IsStationaryState(this BattlerStatusState statusState) => statusState switch {
+            BattlerStatusState.SkillWindUp => true,
+            BattlerStatusState.SkillEffect => true,
+            BattlerStatusState.SkillWindDown => true,
+            BattlerStatusState.Staggered => true,
+            _ => false
+        };
+    }
+
     public class BattlerStatus {
         public BattlerStatusState Current { get; private set; }
         public bool IsVulnerable => Current == BattlerStatusState.SkillWindUp || Current == BattlerStatusState.SkillWindDown || Current == BattlerStatusState.Staggered;
@@ -22,7 +32,7 @@
             Current = BattlerStatusState.OK;
         }
 
-        public bool ApplyState(BattlerStatusState state) {
+        public bool ApplyState(BattlerStatusState state, bool? stationaryStatusOverride = null) {
             if (state == BattlerStatusState.SkillWindDown && Current != BattlerStatusState.SkillEffect) {
                 return false;
             }
@@ -31,32 +41,25 @@
                 return true;
             }
 
+            var isNewStateStationary = stationaryStatusOverride ?? state.IsStationaryState();
+            var isStationaryStatusChanging = Current.IsStationaryState() != state.IsStationaryState();
+
             Current = state;
 
             OnBlockStatusChanged?.Invoke(isNowBlocking: Current == BattlerStatusState.Blocking);
 
+            if (isStationaryStatusChanging) {
+                OnStationaryStatusChanged?.Invoke(isNewStateStationary);
+            }
+
             switch (Current) {
-
-                case BattlerStatusState.OK:
-                case BattlerStatusState.Blocking:
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: false);
-                    break;
-
                 case BattlerStatusState.Staggered:
                     OnStaggerApplied?.Invoke();
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: true);
                     break;
 
                 case BattlerStatusState.SkillWindDown:
                     OnSkillWindDown?.Invoke();
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: true);
                     break;
-
-                case BattlerStatusState.SkillEffect:
-                case BattlerStatusState.SkillWindUp:
-                    OnStationaryStatusChanged?.Invoke(isNowStationary: true);
-                    break;
-
             }
 
             return true;
@@ -68,14 +71,18 @@
             }
 
             bool isRemovingState = stateToRemove == Current;
-            bool isRemovingBlock = Current == BattlerStatusState.Blocking;
-
             if (isRemovingState) {
+                bool isRemovingBlock = Current == BattlerStatusState.Blocking;
+                bool isRemovingStationary = Current.IsStationaryState();
+
                 Current = BattlerStatusState.OK;
-                OnStationaryStatusChanged?.Invoke(isNowStationary: false);
 
                 if (isRemovingBlock) {
                     OnBlockStatusChanged?.Invoke(isNowBlocking: false);
+                }
+
+                if (isRemovingStationary) {
+                    OnStationaryStatusChanged?.Invoke(isNowStationary: false);
                 }
             }
 

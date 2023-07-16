@@ -5,10 +5,21 @@ namespace AWE.Synzza.UnityLayer {
     [CreateAssetMenu(fileName = "NewHitboxSkill", menuName = "Scrib/SkillEffect/Hitbox")]
     public class HitboxSkillEffectScrib : SkillEffectScrib {
         [SerializeField] protected GameObject _hitbox;
-        [SerializeField] protected SpawnProfileScrib _hitboxSpawnProfile;
+        [SerializeField] protected SpawnLocationProfileScrib _hitboxSpawnLocationProfile;
         [SerializeField] protected SkillEffectDurationProfileScrib _effectDurationProfile;
         [SerializeField] protected SkillAttackRangeProfileScrib _attackRangeProfile;
 
+        public HitboxSkillEffect ToHitboxSkillEffect() => new(
+            SingletonSynzzaGame.Current,
+            new UnitySkillHitboxPrefab(_hitbox),
+            _isInterruptible,
+            _effectDurationProfile.ToTuple(),
+            _hitboxSpawnLocationProfile.ID,
+            _attackRangeProfile.ID
+        );
+        public override SkillEffect ToSkillEffect() => ToHitboxSkillEffect();
+
+        /*
         public override bool IsIndefinite => _effectDurationProfile != null && _effectDurationProfile.IsIndefinite;
 
         public override bool IsEffectActivatable(BattlerMonocomponent sourceBattler, BattlerMonocomponent targetBattler) {
@@ -34,8 +45,8 @@ namespace AWE.Synzza.UnityLayer {
             var spawnRotation = Quaternion.identity;
 
             if (_hitboxSpawnProfile != null) {
-                var sceneObject = new UnitySceneObject(sourceTransform);
-                var spawnProfile = _hitboxSpawnProfile.ToSpawnProfile(0);
+                var sceneObject = new UnityWorldObject(sourceTransform);
+                var spawnProfile = _hitboxSpawnProfile.ToSpawnLocationProfile();
                 spawnPosition = spawnProfile.FindSpawnPosition(sceneObject, sourceTransform.lossyScale.ToFloat3(), sourceTransform.lossyScale.ToFloat3()).ToVector3();
                 spawnRotation = spawnProfile.FindSpawnRotation(sceneObject).ToQuaternion();
             }
@@ -70,5 +81,6 @@ namespace AWE.Synzza.UnityLayer {
             }
             sourceBattler.Battler.Status.ApplyState(BattlerStatusState.SkillWindDown);
         }
+        */
     }
 }

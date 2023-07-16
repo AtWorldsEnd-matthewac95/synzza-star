@@ -1,15 +1,15 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace AWE.Synzza.UnityLayer {
-    public class UnitySceneObject : ISceneObject {
+    public class UnityWorldObject : IWorldObject {
         public Transform transform { get; }
         public bool IsMobile { get; set; }
 
-        private MonoBehaviour _mono;
+        private readonly MonoBehaviour _mono;
 
-        public UnitySceneObject(Transform T, bool isMobile = true) {
+        public UnityWorldObject(Transform T, bool isMobile = true) {
             transform = T;
             IsMobile = isMobile;
 
@@ -17,7 +17,7 @@ namespace AWE.Synzza.UnityLayer {
                 _mono = null;
             }
         }
-        public UnitySceneObject(MonoBehaviour mono, bool isMobile = true) {
+        public UnityWorldObject(MonoBehaviour mono, bool isMobile = true) {
             _mono = mono;
             transform = _mono.transform;
             IsMobile = isMobile;
@@ -40,17 +40,30 @@ namespace AWE.Synzza.UnityLayer {
                 _mono.StartCoroutine(new UnityCoroutine(coroutine));
             }
         }
+
+        public void StartCoroutine(in IEnumerable<ICoWait> coroutine) {
+            if (_mono != null) {
+                _mono.StartCoroutine(new UnityCoroutine(coroutine));
+            }
+        }
+
+        public event SceneObjectPreDestroyDelegate OnPreDestroy;
+
+        public void Destroy() {
+            OnPreDestroy?.Invoke(this);
+            UnityEngine.Object.Destroy(transform.gameObject);
+        }
     }
 
-    public class UnityBattlerSceneObject : UnitySceneObject, IBattlerSceneObject {
+    public class UnityBattlerWorldObject : UnityWorldObject, IBattlerWorldObject {
         public Battler Battler { get; }
         public SkillUsage CurrentSkillUsage { get; private set; }
 
-        public UnityBattlerSceneObject(Battler battler, Transform T, bool isMobile = true) : base(T, isMobile) {
+        public UnityBattlerWorldObject(Battler battler, Transform T, bool isMobile = true) : base(T, isMobile) {
             Battler = battler;
             CurrentSkillUsage = null;
         }
-        public UnityBattlerSceneObject(BattlerMonocomponent battler, bool isMobile = true) : base(battler, isMobile) {
+        public UnityBattlerWorldObject(BattlerMonocomponent battler, bool isMobile = true) : base(battler, isMobile) {
             Battler = battler.Battler;
             CurrentSkillUsage = null;
         }
@@ -66,6 +79,30 @@ namespace AWE.Synzza.UnityLayer {
 
             CurrentSkillUsage = usage;
             return true;
+        }
+
+        public void ReactToSkillHitbox(ISkillHitboxWorldObject hitbox) {
+            //var sourceBattler = hitbox.Hitbox.
+        }
+    }
+
+    public class UnitySkillHitboxWorldObject : UnityWorldObject, ISkillHitboxWorldObject {
+        public SkillHitbox Hitbox { get; }
+
+        // TODO - Do we really need BattlerMonocomponent? Seems like IBattlerWorldObject would be sufficient...
+
+        public UnitySkillHitboxWorldObject(SkillHitbox hitbox, BattlerMonocomponent sourceBattler, Transform T, bool isMobile = true) : base(T, isMobile) {
+            Hitbox = hitbox;
+
+            if (T.gameObject.TryGetComponent(out SkillHitboxMonocomponent mono)) {
+                if (sourceBattler == null) {
+                    throw new ArgumentException($"Cannot initialize a {mono.GetType().Name} component with a null {typeof(BattlerMonocomponent).Name}!");
+                }
+
+                mono.Initialize(sourceBattler);
+            } else {
+                throw new ArgumentException($"{GetType().Name} must be created with a {T.GetType().Name} attached to a {T.gameObject.GetType().Name} with a {typeof(SkillHitboxMonocomponent).Name} component!");
+            }
         }
     }
 }

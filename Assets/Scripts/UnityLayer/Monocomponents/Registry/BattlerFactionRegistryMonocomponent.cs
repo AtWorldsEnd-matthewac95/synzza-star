@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace AWE.Synzza.UnityLayer {
     /*
@@ -11,15 +10,15 @@ namespace AWE.Synzza.UnityLayer {
         private BattlerFactionRegistry _registry = null;
 
         private void Awake() {
-            var game = SynzzaGame.Current;
-            game.BeginInitializationStage(GameInitializationStage.BattlerFactionRegistration);
+            var game = SingletonSynzzaGame.Current;
+            game.BeginInitializationStage(SingletonGameInitializationStage.BattlerFactionRegistration);
 
             _registry = game.BattlerFactions;
             foreach (var scrib in _factionsToRegister) {
-                _registry.RegisterFaction(scrib.ToBattlerFaction());
+                _registry.Register(scrib.ToBattlerFaction());
             }
 
-            game.CompleteInitializationStage(GameInitializationStage.BattlerFactionRegistrationCompleted);
+            game.CompleteInitializationStage(SingletonGameInitializationStage.BattlerFactionRegistrationCompleted);
         }
     }
 }

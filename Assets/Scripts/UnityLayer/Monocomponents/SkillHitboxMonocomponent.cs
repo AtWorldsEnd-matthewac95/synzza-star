@@ -1,7 +1,8 @@
-﻿using Unity.VisualScripting;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace AWE.Synzza.UnityLayer {
+    // TODO - Remove from UnityLayer
+
     public class SkillHitboxMonocomponent : MonoBehaviour {
         private bool _isInitialized = false;
 

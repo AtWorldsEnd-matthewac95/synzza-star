@@ -1,5 +1,7 @@
 ﻿namespace AWE.Synzza {
-    public readonly struct SpawnProfile {
+    public readonly struct SpawnLocationProfile {
+        public const byte INVALID_ID = 0;
+
         public byte ID { get; }
         public float3 PositionalOffset { get; }
         public float3 DirectionalOffsetMagnitudes { get; }
@@ -8,9 +10,9 @@
         public bool IsIgnoringInheritedYRotation { get; }
         public bool IsIgnoringInheritedZRotation { get; }
 
-        public SpawnProfile(byte id, in float3 positionalOffset, in float3 directionalOffsetMagnitudes, bool isInheritingRotation)
+        public SpawnLocationProfile(byte id, in float3 positionalOffset, in float3 directionalOffsetMagnitudes, bool isInheritingRotation)
             : this(id, positionalOffset, directionalOffsetMagnitudes, isInheritingRotation, false, false, false) {}
-        public SpawnProfile(
+        public SpawnLocationProfile(
             byte id,
             in float3 positionalOffset,
             in float3 directionalOffsetMagnitudes,
@@ -30,42 +32,42 @@
 
         public bool IsIgnoringAnyInheritedRotation => IsIgnoringInheritedXRotation || IsIgnoringInheritedYRotation || IsIgnoringInheritedZRotation;
 
-        public float3 FindSpawnPosition(ISceneObject spawner)
+        public float3 FindSpawnPosition(IWorldObject spawner)
             => spawner.WorldPosition
             + PositionalOffset
             + (DirectionalOffsetMagnitudes.x * spawner.WorldRight)
             + (DirectionalOffsetMagnitudes.y * spawner.WorldUp)
             + (DirectionalOffsetMagnitudes.z * spawner.WorldForward);
 
-        public float3 FindSpawnPosition(ISceneObject spawner, in float3 positionalOffsetScale)
+        public float3 FindSpawnPosition(IWorldObject spawner, in float3 positionalOffsetScale)
             => spawner.WorldPosition
             + new float3(PositionalOffset.x * positionalOffsetScale.x, PositionalOffset.y * positionalOffsetScale.y, PositionalOffset.z * positionalOffsetScale.z)
             + (DirectionalOffsetMagnitudes.x * spawner.WorldRight)
             + (DirectionalOffsetMagnitudes.y * spawner.WorldUp)
             + (DirectionalOffsetMagnitudes.z * spawner.WorldForward);
 
-        public float3 FindSpawnPosition(ISceneObject spawner, in float3 positionalOffsetScale, in float3 directionalOffsetScale)
+        public float3 FindSpawnPosition(IWorldObject spawner, in float3 positionalOffsetScale, in float3 directionalOffsetScale)
             => spawner.WorldPosition
             + new float3(PositionalOffset.x * positionalOffsetScale.x, PositionalOffset.y * positionalOffsetScale.y, PositionalOffset.z * positionalOffsetScale.z)
             + (DirectionalOffsetMagnitudes.x * directionalOffsetScale.x * spawner.WorldRight)
             + (DirectionalOffsetMagnitudes.y * directionalOffsetScale.y * spawner.WorldUp)
             + (DirectionalOffsetMagnitudes.z * directionalOffsetScale.z * spawner.WorldForward);
 
-        public float3 FindSpawnPosition(ISceneObject spawner, float positionalOffsetScale)
+        public float3 FindSpawnPosition(IWorldObject spawner, float positionalOffsetScale)
             => spawner.WorldPosition
             + (PositionalOffset * positionalOffsetScale)
             + (DirectionalOffsetMagnitudes.x * spawner.WorldRight)
             + (DirectionalOffsetMagnitudes.y * spawner.WorldUp)
             + (DirectionalOffsetMagnitudes.z * spawner.WorldForward);
 
-        public float3 FindSpawnPosition(ISceneObject spawner, float positionalOffsetScale, float directionalOffsetScale)
+        public float3 FindSpawnPosition(IWorldObject spawner, float positionalOffsetScale, float directionalOffsetScale)
             => spawner.WorldPosition
             + (PositionalOffset * positionalOffsetScale)
             + (DirectionalOffsetMagnitudes.x * directionalOffsetScale * spawner.WorldRight)
             + (DirectionalOffsetMagnitudes.y * directionalOffsetScale * spawner.WorldUp)
             + (DirectionalOffsetMagnitudes.z * directionalOffsetScale * spawner.WorldForward);
 
-        public float4 FindSpawnRotation(ISceneObject spawner) {
+        public float4 FindSpawnRotation(IWorldObject spawner) {
             var rotation = QuaternionMath.Calculator.identity;
 
             if (IsInheritingRotation) {
@@ -84,12 +86,8 @@
         }
     }
 
-    public sealed class SpawnProfileRegistry : ByteSizedRegistry<SpawnProfile> {
-        protected override byte GetRegisterableID(in SpawnProfile spawnProfile) => spawnProfile.ID;
-
-        public bool TryRegisterSpawnProfile(in SpawnProfile spawnProfile, bool isOverwritingAllowed = false) => TryRegister(spawnProfile, isOverwritingAllowed);
-        public bool TryRegisterSpawnProfile(in SpawnProfile spawnProfile, out SpawnProfile registered) => TryRegister(spawnProfile, out registered);
-        public void RegisterSpawnProfile(in SpawnProfile spawnProfile, bool isOverwritingAllowed = false) => Register(spawnProfile, isOverwritingAllowed);
-        public bool UnregisterSpawnProfile(in SpawnProfile spawnProfile) => Unregister(spawnProfile);
+    public sealed class SpawnLocationProfileRegistry : ByteSizedRegistry<SpawnLocationProfile> {
+        protected override byte GetRegisterableID(in SpawnLocationProfile spawnProfile) => spawnProfile.ID;
+        protected override bool TryGetInvalidID(out byte invalidID) { invalidID = SpawnLocationProfile.INVALID_ID; return true; }
     }
 }

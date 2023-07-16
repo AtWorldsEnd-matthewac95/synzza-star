@@ -23,22 +23,35 @@ namespace AWE.Synzza {
         public static int Range(int inclusiveMin, int exclusiveMax) => _rng.Next(inclusiveMin, exclusiveMax);
     }
 
-    public struct float3 {
+    public readonly struct float3 {
         public float x { get; }
         public float y { get; }
         public float z { get; }
 
         public float3(float X, float Y, float Z) { x = X; y = Y; z = Z; }
 
-        public static float3 operator+(float3 a, float3 b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
-        public static float3 operator-(float3 a, float3 b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
-        public static float3 operator*(float a, float3 b) => new(a * b.x, a * b.y, a * b.z);
-        public static float3 operator*(float3 a, float b) => new(a.x * b, a.y * b, a.z * b);
+        public static float3 operator+(in float3 a, in float3 b) => new(a.x + b.x, a.y + b.y, a.z + b.z);
+        public static float3 operator-(in float3 a, in float3 b) => new(a.x - b.x, a.y - b.y, a.z - b.z);
+        public static float3 operator*(float a, in float3 b) => new(a * b.x, a * b.y, a * b.z);
+        public static float3 operator*(in float3 a, float b) => new(a.x * b, a.y * b, a.z * b);
 
         public float MagnitudeSquared => (x * x) + (y * y) + (z * z);
     }
 
-    public struct float4 {
+    public readonly struct Volume {
+        private readonly float3 _dimensions;
+
+        public Volume(float width, float height, float depth) => _dimensions = new(width, height, depth);
+        public Volume(in float3 dimensions) => _dimensions = dimensions;
+
+        public float Width => _dimensions.x;
+        public float Height => _dimensions.y;
+        public float Depth => _dimensions.z;
+
+        public float3 ToFloat3() => _dimensions;
+    }
+
+    public readonly struct float4 {
         public float x { get; }
         public float y { get; }
         public float z { get; }
@@ -69,7 +82,7 @@ namespace AWE.Synzza {
         public static QuaternionMath Calculator => _calculator;
 
         public abstract float4 Euler(float x, float y, float z);
-        public float4 Euler(float3 euler) => Euler(euler.x, euler.y, euler.z);
+        public float4 Euler(in float3 euler) => Euler(euler.x, euler.y, euler.z);
         public abstract float4 identity { get; }
     }
 

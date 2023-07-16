@@ -12,6 +12,7 @@ namespace AWE.Synzza {
 
         protected abstract byte GetRegisterableID(in TRegisterable registerable);
         protected virtual string GetRegisterableDisplayName(in TRegisterable registerable) => string.Empty;
+        protected virtual bool TryGetInvalidID(out byte invalidID) { invalidID = default; return false; }
 
         public ByteSizedRegistry() {
             _registry = new Pair[byte.MaxValue + 1];
@@ -24,7 +25,7 @@ namespace AWE.Synzza {
         public bool TryRegister(in TRegisterable registerable, out TRegisterable registered) => TryRegister(registerable, out registered, false);
         protected bool TryRegister(in TRegisterable registerable, out TRegisterable registered, bool isOverwritingAllowed) {
             var id = GetRegisterableID(registerable);
-            var isAbleToRegister = isOverwritingAllowed || !IsRegistered(id);
+            var isAbleToRegister = (!TryGetInvalidID(out byte invalidID) || id != invalidID) && (isOverwritingAllowed || !IsRegistered(id));
 
             if (isAbleToRegister) {
                 UncheckedRegister(registerable);
@@ -36,6 +37,10 @@ namespace AWE.Synzza {
 
         public void Register(in TRegisterable registerable, bool isOverwritingAllowed = false) {
             var id = GetRegisterableID(registerable);
+
+            if (TryGetInvalidID(out byte invalidID) && id == invalidID) {
+                throw new InvalidOperationException($"ID {invalidID} is invalid for this {typeof(TRegisterable).Name} registry.");
+            }
 
             if (!isOverwritingAllowed && IsRegistered(id)) {
                 ref var existing = ref _registry[id].Registerable;

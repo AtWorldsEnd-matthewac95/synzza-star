@@ -9,13 +9,13 @@ namespace AWE.Synzza {
         OpportuneAttack
     }
 
-    public class Battler {
+    public class Battler : SynzzaGameDependent {
         public byte FactionID { get; private set; }
 
         public void SetFaction(in BattlerFaction faction) => SetFaction(faction.ID, faction.DisplayName);
         public void SetFaction(byte factionId) => SetFaction(factionId, string.Empty);
         private void SetFaction(byte factionId, string factionName) {
-            if (!SynzzaGame.Current.BattlerFactions.IsRegistered(factionId)) {
+            if (!_game.BattlerFactions.IsRegistered(factionId)) {
                 var factionNameString = string.IsNullOrWhiteSpace(factionName) ? string.Empty : $" \"{factionName}\"";
                 throw new ArgumentException($"{GetType().Name} \"{DisplayName}\" attempted to set its faction to an unregistered faction{factionNameString}!");
             }
@@ -45,7 +45,16 @@ namespace AWE.Synzza {
 
         public event SkillEffectCancelledDelegate OnSkillEffectCancelled;
 
-        public Battler(string displayName, uint innateSkillCooldown, float innateMeleeAttackRange, BattlerStaggerProfile staggerProfile, BattlerMeleeRules innateMeleeRules = BattlerMeleeRules.AutoBlock) {
+        public Battle CurrentBattle { get; private set; }
+
+        public Battler(
+            SynzzaGame game,
+            string displayName,
+            uint innateSkillCooldown,
+            float innateMeleeAttackRange,
+            BattlerStaggerProfile staggerProfile,
+            BattlerMeleeRules innateMeleeRules = BattlerMeleeRules.AutoBlock
+        ) : base(game) {
             DisplayName = displayName;
             InnateSkillCooldown = Math.Max(innateSkillCooldown, 1);
             InnateMeleeAttackRange = Math.Max(innateMeleeAttackRange, 0f);
@@ -57,6 +66,7 @@ namespace AWE.Synzza {
             Status.OnStaggerApplied += OnStaggerApplied;
 
             FactionID = BattlerFaction.ID_NONE;
+            CurrentBattle = null;
         }
 
         private void OnStaggerApplied() {

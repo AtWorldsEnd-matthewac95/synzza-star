@@ -2,7 +2,8 @@
 
 namespace AWE.Synzza.UnityLayer {
     [CreateAssetMenu(fileName = "NewSpawnProfile", menuName = "Scrib/SpawnProfile")]
-    public class SpawnProfileScrib : ScriptableObject {
+    public class SpawnLocationProfileScrib : ScriptableObject {
+        [SerializeField] private byte _id;
         [Tooltip("World positional offset from the spawner. This value is agnostic of the spawner's rotation.")]
         [SerializeField] private Vector3 _spawnerPositionalOffset;
         [Tooltip("NOT A POSITION. When the object is spawned, it should be spawned at (spawner.position + positionalOffset + this.X * spawner.right + this.Y * spawner.up + this.Z * spawner.forward)")]
@@ -16,15 +17,10 @@ namespace AWE.Synzza.UnityLayer {
         [Tooltip("If the spawner's rotation is being inherited, should the Z rotation be ignored?")]
         [SerializeField] private bool _isIgnoringInheritedZRotation;
 
-        public Vector3 SpawnerPositionalOffset => _spawnerPositionalOffset;
-        public Vector3 SpawnerDirectionalOffsetMagnitudes => _spawnerDirectionalOffsetMagnitudes;
-        public bool IsInheritingSpawnerRotation => _isInheritingSpawnerRotation;
-        public bool IsIgnoringInheritedXRotation => _isIgnoringInheritedXRotation;
-        public bool IsIgnoringInheritedYRotation => _isIgnoringInheritedYRotation;
-        public bool IsIgnoringInheritedZRotation => _isIgnoringInheritedZRotation;
+        public byte ID => _id;
 
-        public SpawnProfile ToSpawnProfile(byte id) => new(
-            id,
+        public SpawnLocationProfile ToSpawnLocationProfile() => new(
+            _id,
             _spawnerPositionalOffset.ToFloat3(),
             _spawnerDirectionalOffsetMagnitudes.ToFloat3(),
             _isInheritingSpawnerRotation,

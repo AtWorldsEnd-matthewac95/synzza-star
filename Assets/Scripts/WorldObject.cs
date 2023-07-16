@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 namespace AWE.Synzza {
-    public interface ISceneObject {
+    public interface IWorldObject {
         float3 LocalPosition { get; }
         float3 WorldPosition { get; }
         float3 LocalRotation { get; }
@@ -16,12 +16,21 @@ namespace AWE.Synzza {
         float3 WorldUp { get; }
 
         void StartCoroutine(in IEnumerator<ICoWait> coroutine);
+        void StartCoroutine(in IEnumerable<ICoWait> coroutine);
+        void Destroy();
+
+        event SceneObjectPreDestroyDelegate OnPreDestroy;
     }
 
-    public interface IBattlerSceneObject : ISceneObject {
+    public interface IBattlerWorldObject : IWorldObject {
         Battler Battler { get; }
         SkillUsage CurrentSkillUsage { get; }
 
         bool TrySetCurrentSkillUsage(SkillUsage usage);
+        void ReactToSkillHitbox(ISkillHitboxWorldObject hitbox);
+    }
+
+    public interface ISkillHitboxWorldObject : IWorldObject {
+        SkillHitbox Hitbox { get; }
     }
 }

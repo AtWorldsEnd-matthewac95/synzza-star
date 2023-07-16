@@ -6,7 +6,6 @@ namespace AWE.Synzza.UnityLayer {
         [SerializeField] private bool _isIndefinite;
         [SerializeField] [Min(0f)] private float _durationSeconds;
 
-        public bool IsIndefinite => _isIndefinite;
-        public float DurationSeconds => _durationSeconds;
+        public (bool isIndefinite, float durationSeconds) ToTuple() => (_isIndefinite, _durationSeconds);
     }
 }

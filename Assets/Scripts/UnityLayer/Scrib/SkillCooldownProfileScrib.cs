@@ -6,9 +6,6 @@ namespace AWE.Synzza.UnityLayer {
         [SerializeField] private bool _isUsingInnateCooldownTurns;
         [SerializeField] [Min(1)] private uint _cooldownTurns = 1;
 
-        public bool IsUsingInnateCooldownTurns => _isUsingInnateCooldownTurns;
-        public uint CooldownTurns => _cooldownTurns;
-
         public SkillCooldownProfile ToSkillCooldownProfile() => new(_isUsingInnateCooldownTurns, _cooldownTurns);
     }
 }

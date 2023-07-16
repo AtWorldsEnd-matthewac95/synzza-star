@@ -1,5 +1,5 @@
 ﻿namespace AWE.Synzza {
     public interface INpcMovement {
-        ISceneObject PickNewMovementTarget(ISceneObject previousTarget);
+        IWorldObject PickNewMovementTarget(IWorldObject previousTarget);
     }
 }

@@ -15,11 +15,9 @@ namespace AWE.Synzza {
     public sealed class Skill {
         public int ID { get; }
         public string DisplayName { get; }
-        public float WindUpDurationSeconds { get; }
-        public float WindUpVarianceSeconds { get; }
-        public float WindDownDurationSeconds { get; }
-        public float WindDownVarianceSeconds { get; }
         public SkillEffect Effect { get; }
+        public DurationProfile<float> WindUpSeconds { get; }
+        public DurationProfile<float> WindDownSeconds { get; }
 
         private readonly bool _isUsingInnateCooldown;
         private readonly uint _cooldown;
@@ -38,23 +36,21 @@ namespace AWE.Synzza {
             Effect = effect;
             _isUsingInnateCooldown = cooldownProfile.IsUsingInnateCooldown;
             _cooldown = cooldownProfile.Cooldown;
-            WindUpDurationSeconds = windUpSeconds.Duration;
-            WindUpVarianceSeconds = windUpSeconds.Variance;
-            WindDownDurationSeconds = windDownSeconds.Duration;
-            WindDownVarianceSeconds = windDownSeconds.Variance;
+            WindUpSeconds = windUpSeconds;
+            WindDownSeconds = windDownSeconds;
         }
 
-        public IEnumerable<ICoWait> CreateCoroutine(IBattlerSceneObject source, IBattlerSceneObject target) {
-            if (!source.TrySetCurrentSkillUsage(new SkillUsage(this, Effect.CreateUsage(source, target, new(WindDownDurationSeconds, WindDownVarianceSeconds)), target))) {
+        public IEnumerable<ICoWait> CreateCoroutine(IBattlerWorldObject source, IBattlerWorldObject target) {
+            if (!source.TrySetCurrentSkillUsage(new SkillUsage(this, Effect.CreateUsage(this, source, target, WindDownSeconds), target))) {
                 yield break;
             }
 
             var status = source.Battler.Status;
             status.ApplyState(BattlerStatusState.SkillWindUp);
 
-            yield return new CoWaitForSeconds(WindDownDurationSeconds);
+            yield return new CoWaitForSeconds(WindDownSeconds.Duration);
 
-            if (!source.CurrentSkillUsage?.IsStale ?? false) {
+            if (!SkillUsage.IsUsageStale(source.CurrentSkillUsage)) {
                 status.ApplyState(BattlerStatusState.SkillEffect);
                 source.StartCoroutine(source.CurrentSkillUsage.EffectUsage.Coroutine);
             }
@@ -68,14 +64,21 @@ namespace AWE.Synzza {
     public sealed class SkillUsage {
         public Skill Skill { get; }
         public SkillEffectUsage EffectUsage { get; }
-        public IBattlerSceneObject Target { get; }
-        public bool IsStale => EffectUsage?.IsStale ?? false;
+        public IBattlerWorldObject Target { get; private set; }
+        public bool IsStale => EffectUsage?.IsStale ?? true || Target == null;
 
-        public SkillUsage(Skill skill, SkillEffectUsage effectUsage, IBattlerSceneObject target) {
+        public SkillUsage(Skill skill, SkillEffectUsage effectUsage, IBattlerWorldObject target) {
             Skill = skill;
             EffectUsage = effectUsage;
             Target = target;
+            Target.OnPreDestroy += (preDestroyObject) => {
+                if (preDestroyObject == Target) {
+                    Target = null;
+                }
+            };
         }
+
+        public static bool IsUsageStale(SkillUsage usage) => usage?.IsStale ?? true;
     }
 
     public sealed class SkillRegistry {

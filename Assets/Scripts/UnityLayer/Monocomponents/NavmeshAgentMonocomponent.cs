@@ -6,7 +6,7 @@ namespace AWE.Synzza.UnityLayer {
     public abstract class NavmeshAgentMonocomponent : MonoBehaviour {
         protected NavMeshAgent _agent;
 
-        protected ISceneObject _currentTarget = null;
+        protected IWorldObject _currentTarget = null;
         protected Transform _currentTargetTransform = null;
 
         protected virtual void Awake() {
@@ -32,14 +32,6 @@ namespace AWE.Synzza.UnityLayer {
                     _agent.destination = _currentTargetTransform.position;
                 }
             }
-        }
-
-        public virtual void PauseAgent() {
-            _agent.isStopped = true;
-        }
-
-        public virtual void ResumeAgent() {
-            _agent.isStopped = false;
         }
     }
 }

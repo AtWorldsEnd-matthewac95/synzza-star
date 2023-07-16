@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f332a2924652f624e9c9a14f2e034459, type: 3}
   m_Name: Enemy Block
   m_EditorClassIdentifier: 
-  _ID: 1
+  _id: 2
   _displayName: Block
   _windUpDurationSeconds: 0.5
   _windUpVarianceSeconds: 0

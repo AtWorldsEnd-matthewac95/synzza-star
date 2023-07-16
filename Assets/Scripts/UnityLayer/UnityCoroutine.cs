@@ -8,6 +8,7 @@ namespace AWE.Synzza.UnityLayer {
         private object _current = null;
 
         public UnityCoroutine(in IEnumerator<ICoWait> coroutine) => _coroutine = coroutine;
+        public UnityCoroutine(in IEnumerable<ICoWait> coroutine) => _coroutine = coroutine.GetEnumerator();
 
         private bool ToUnityLayer(in ICoWait wait, out object converted) {
             converted = wait.WaitType switch {

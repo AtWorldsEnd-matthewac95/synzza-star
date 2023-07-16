@@ -41,7 +41,7 @@ namespace AWE.Synzza.Demo.UnityLayer {
 
         protected override void PickNewDestination() {
             var enemy = _movement.GetNextEnemy();
-            _currentTarget = new UnitySceneObject(enemy.transform);
+            _currentTarget = new UnityWorldObject(enemy.transform);
             _currentTargetTransform = enemy.transform;
             TargetBattler = enemy;
         }

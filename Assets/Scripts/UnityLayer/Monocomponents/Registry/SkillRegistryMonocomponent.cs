@@ -10,16 +10,15 @@ namespace AWE.Synzza.UnityLayer {
         private SkillRegistry _registry = null;
 
         private void Awake() {
-            var game = SynzzaGame.Current;
-            game.BeginInitializationStage(GameInitializationStage.SkillRegistration);
+            var game = SingletonSynzzaGame.Current;
+            game.BeginInitializationStage(SingletonGameInitializationStage.SkillRegistration);
 
             _registry = game.Skills;
             for (int i = 0; i < _skillsToRegister.Length; ++i) {
                 _registry.RegisterSkill(_skillsToRegister[i].ToSkill());
             }
 
-            game.CompleteInitializationStage(GameInitializationStage.SkillRegistrationCompleted);
-            game.SetInitializationDone();
+            game.CompleteInitializationStage(SingletonGameInitializationStage.SkillRegistrationCompleted);
         }
     }
 }

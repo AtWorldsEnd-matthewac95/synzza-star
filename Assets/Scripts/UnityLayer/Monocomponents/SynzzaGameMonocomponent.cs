@@ -8,11 +8,11 @@ namespace AWE.Synzza.UnityLayer {
         private void Awake() {
             DontDestroyOnLoad(this);
             QuaternionMath.ProvideCalculator(new UnityQuaternionMath());
-            SynzzaGame.CreateGame();
+            SingletonSynzzaGame.CreateGame((byte)BattlerFactionID.Player);
         }
 
         private void OnDestroy() {
-            SynzzaGame.DestroyGame();
+            SingletonSynzzaGame.DestroyGame();
             QuaternionMath.ReleaseCalculator();
         }
     }
