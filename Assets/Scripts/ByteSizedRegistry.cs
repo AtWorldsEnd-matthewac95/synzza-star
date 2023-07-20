@@ -18,6 +18,12 @@ namespace AWE.Synzza {
             _registry = new Pair[byte.MaxValue + 1];
         }
 
+        public bool TryGetRegistered(byte id, out TRegisterable registered) {
+            bool success = IsRegistered(id);
+            registered = success ? this[id] : default;
+            return success;
+        }
+
         public bool IsRegistered(byte id) => _registry[id].IsRegistered;
         public ref TRegisterable this[byte id] => ref _registry[id].Registerable;
 

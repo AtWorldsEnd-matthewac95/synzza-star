@@ -7,6 +7,8 @@ namespace AWE.Synzza.UnityLayer {
         private readonly IEnumerator<ICoWait> _coroutine;
         private object _current = null;
 
+        public event CoroutineFinishedDelegate OnFinished;
+
         public UnityCoroutine(in IEnumerator<ICoWait> coroutine) => _coroutine = coroutine;
         public UnityCoroutine(in IEnumerable<ICoWait> coroutine) => _coroutine = coroutine.GetEnumerator();
 
@@ -21,11 +23,21 @@ namespace AWE.Synzza.UnityLayer {
         }
 
         public object Current => _current;
-        public bool MoveNext() => _coroutine.MoveNext() && ToUnityLayer(_coroutine.Current, out _current);
+        public bool MoveNext() {
+            var isNextValid = _coroutine.MoveNext() && ToUnityLayer(_coroutine.Current, out _current);
+
+            if (!isNextValid) {
+                OnFinished?.Invoke(this);
+            }
+
+            return isNextValid;
+        }
 
         public void Reset() {
             _coroutine.Reset();
             _current = null;
         }
+
+        public bool IsContaining(in IEnumerator<ICoWait> enumerator) => _coroutine == enumerator;
     }
 }

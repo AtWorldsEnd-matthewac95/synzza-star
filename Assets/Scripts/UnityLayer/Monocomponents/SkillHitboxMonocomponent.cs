@@ -7,15 +7,15 @@ namespace AWE.Synzza.UnityLayer {
         private bool _isInitialized = false;
 
         public bool IsInitialized => _isInitialized;
-        public BattlerMonocomponent SourceBattler { get; private set; }
+        public UnitySkillHitboxWorldObject WorldObject { get; private set; }
 
-        public void Initialize(BattlerMonocomponent source) {
+        public void Initialize(SkillHitbox skillHitbox) {
             if (_isInitialized) {
                 Debug.LogError($"{GetType().Name} \"{gameObject.name}\" attempted to be initialized more than once!");
                 return;
             }
 
-            SourceBattler = source;
+            WorldObject = new(skillHitbox, this);
             _isInitialized = true;
         }
 

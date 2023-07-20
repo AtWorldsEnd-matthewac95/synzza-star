@@ -17,3 +17,6 @@ MonoBehaviour:
   _innateMeleeAttackRange: 2
   _innateMeleeRules: 2
   _staggerProfile: {fileID: 11400000, guid: 928cb037e64f76b44ae10dd2f935399e, type: 2}
+  _blockSkill: {fileID: 11400000, guid: 4f20b7b1721d41340b7b1aefe9087248, type: 2}
+  _defaultCounterSkill: {fileID: 11400000, guid: 46b55d08172cb0842835d7b2cc16b7d3,
+    type: 2}

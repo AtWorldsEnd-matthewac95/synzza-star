@@ -38,9 +38,5 @@ namespace AWE.Synzza {
             Coroutine = coroutine;
             Capture = capture;
         }
-
-        public void Cancel() {
-            Coroutine = null;
-        }
     }
 }

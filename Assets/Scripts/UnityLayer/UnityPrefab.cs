@@ -15,10 +15,6 @@ namespace AWE.Synzza.UnityLayer {
         public IBattlerWorldObject SourceBattler { get; protected set; }
 
         public UnitySkillHitboxPrefab(GameObject prefab, SkillHitbox hitbox = null) : base(prefab) {
-            if (!prefab.TryGetComponent<SkillHitboxMonocomponent>(out _)) {
-                throw new ArgumentException($"{GetType().Name} instances must be created with a prefab that has a {typeof(SkillHitboxMonocomponent).Name} component!");
-            }
-
             SkillHitbox = hitbox;
         }
 
@@ -27,7 +23,7 @@ namespace AWE.Synzza.UnityLayer {
                 throw new InvalidOperationException($"Cannot overwrite existing {typeof(SkillHitbox).Name}!");
             }
 
-            SkillHitbox = null;
+            SkillHitbox = hitbox;
         }
 
         public void SetSourceBattler(IBattlerWorldObject sourceBattler) {

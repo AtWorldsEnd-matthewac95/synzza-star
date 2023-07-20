@@ -17,6 +17,8 @@ namespace AWE.Synzza {
 
         void StartCoroutine(in IEnumerator<ICoWait> coroutine);
         void StartCoroutine(in IEnumerable<ICoWait> coroutine);
+        void StopCoroutine(in IEnumerator<ICoWait> coroutine);
+        void StopAllCoroutines();
         void Destroy();
 
         event SceneObjectPreDestroyDelegate OnPreDestroy;
@@ -25,9 +27,10 @@ namespace AWE.Synzza {
     public interface IBattlerWorldObject : IWorldObject {
         Battler Battler { get; }
         SkillUsage CurrentSkillUsage { get; }
+        bool IsInvincible { get; }
 
         bool TrySetCurrentSkillUsage(SkillUsage usage);
-        void ReactToSkillHitbox(ISkillHitboxWorldObject hitbox);
+        void ReactToSkillHitbox(in ISkillHitboxWorldObject hitbox);
     }
 
     public interface ISkillHitboxWorldObject : IWorldObject {

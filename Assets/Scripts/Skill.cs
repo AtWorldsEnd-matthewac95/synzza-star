@@ -48,7 +48,7 @@ namespace AWE.Synzza {
             var status = source.Battler.Status;
             status.ApplyState(BattlerStatusState.SkillWindUp);
 
-            yield return new CoWaitForSeconds(WindDownSeconds.Duration);
+            yield return new CoWaitForSeconds(WindUpSeconds.Duration);
 
             if (!SkillUsage.IsUsageStale(source.CurrentSkillUsage)) {
                 status.ApplyState(BattlerStatusState.SkillEffect);
@@ -86,6 +86,12 @@ namespace AWE.Synzza {
 
         public bool IsRegistered(int id) => _registry.ContainsKey(id);
         public Skill this[int id] => _registry[id];
+
+        public bool TryGetSkill(int id, out Skill registered) {
+            bool success = IsRegistered(id);
+            registered = success ? this[id] : null;
+            return success;
+        }
 
         public bool TryRegisterSkill(Skill skill, bool isOverwritingAllowed = false) => TryRegisterSkill(skill, out _, isOverwritingAllowed);
         public bool TryRegisterSkill(Skill skill, out Skill registered) => TryRegisterSkill(skill, out registered, false);

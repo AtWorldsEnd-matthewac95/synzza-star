@@ -8,6 +8,8 @@ namespace AWE.Synzza.UnityLayer {
         [SerializeField] private float _innateMeleeAttackRange;
         [SerializeField] private BattlerMeleeRules _innateMeleeRules;
         [SerializeField] private BattlerStaggerProfileScrib _staggerProfile;
+        [SerializeField] private SkillScrib _blockSkill;
+        [SerializeField] private SkillScrib _defaultCounterSkill;
 
         public Battler ToBattler() {
             BattlerStaggerProfile staggerProfile;
@@ -19,7 +21,7 @@ namespace AWE.Synzza.UnityLayer {
                 staggerProfile = _staggerProfile.ToBattlerStaggerProfile();
             }
 
-            return new(SingletonSynzzaGame.Current, _displayName, _innateSkillCooldown, _innateMeleeAttackRange, staggerProfile, _innateMeleeRules);
+            return new(SingletonSynzzaGame.Current, _displayName, _innateSkillCooldown, _innateMeleeAttackRange, staggerProfile, _blockSkill.ID, _defaultCounterSkill.ID, _innateMeleeRules);
         }
     }
 }

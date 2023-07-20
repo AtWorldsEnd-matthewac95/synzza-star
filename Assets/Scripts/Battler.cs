@@ -23,9 +23,9 @@ namespace AWE.Synzza {
             FactionID = factionId;
         }
 
-        public string DisplayName { get; private set; }
-        public uint InnateSkillCooldown { get; private set; }
-        public float InnateMeleeAttackRange { get; private set; }
+        public string DisplayName { get; protected set; }
+        public uint InnateSkillCooldown { get; protected set; }
+        public float InnateMeleeAttackRange { get; protected set; }
         public BattlerMeleeRules InnateMeleeRules { get; }
         public BattlerStatus Status { get; }
         public BattlerStaggerProfile StaggerProfile { get; }
@@ -33,7 +33,7 @@ namespace AWE.Synzza {
         public delegate void MeleeRulesUpdateDelegate(bool isSameRules, BattlerMeleeRules newRules);
         public event MeleeRulesUpdateDelegate OnUpdateMeleeRules;
 
-        private BattlerMeleeRules _currentMeleeRules;
+        protected BattlerMeleeRules _currentMeleeRules;
         public BattlerMeleeRules CurrentMeleeRules {
             get => _currentMeleeRules;
             set {
@@ -44,8 +44,16 @@ namespace AWE.Synzza {
         }
 
         public event SkillEffectCancelledDelegate OnSkillEffectCancelled;
+        public event ChangeTargetBattlerDelegate OnChangeTargetBattler;
+        public event ChangeTargetSkillDelegate OnChangeTargetSkill;
 
-        public Battle CurrentBattle { get; private set; }
+        public Battle CurrentBattle { get; protected set; }
+        public IBattlerWorldObject CurrentTargetBattler { get; protected set; }
+        public IBattlerWorldObject CurrentBlockTargetBattler { get; protected set; }
+        public Skill CurrentBlockSkill { get; protected set; }
+        public Skill CurrentTargetSkill { get; protected set; }
+        public Skill CurrentCounterSkill { get; protected set; }
+        public Skill DefaultCounterSkill { get; protected set; }
 
         public Battler(
             SynzzaGame game,
@@ -53,14 +61,20 @@ namespace AWE.Synzza {
             uint innateSkillCooldown,
             float innateMeleeAttackRange,
             BattlerStaggerProfile staggerProfile,
+            int blockSkillID,
+            int defaultCounterSkillID,
             BattlerMeleeRules innateMeleeRules = BattlerMeleeRules.AutoBlock
         ) : base(game) {
             DisplayName = displayName;
             InnateSkillCooldown = Math.Max(innateSkillCooldown, 1);
             InnateMeleeAttackRange = Math.Max(innateMeleeAttackRange, 0f);
             InnateMeleeRules = innateMeleeRules;
-            CurrentMeleeRules = InnateMeleeRules;
+            _currentMeleeRules = InnateMeleeRules;
             StaggerProfile = staggerProfile;
+
+            SetBlockSkill(blockSkillID);
+            SetDefaultCounterSkill(defaultCounterSkillID);
+            CurrentCounterSkill = DefaultCounterSkill;
 
             Status = new();
             Status.OnStaggerApplied += OnStaggerApplied;
@@ -69,12 +83,79 @@ namespace AWE.Synzza {
             CurrentBattle = null;
         }
 
-        private void OnStaggerApplied() {
+        protected virtual void OnStaggerApplied() {
             if (Status.Current != BattlerStatusState.Staggered) {
                 throw new InvalidOperationException($"{GetType().Name} \"{DisplayName}\" attempted to run {MethodBase.GetCurrentMethod().Name} when its status was {Status.Current}!");
             }
 
             OnSkillEffectCancelled?.Invoke(BattlerStatusState.Staggered);
         }
+
+        public void SetBlockSkill(int blockSkillID) {
+            if (!_game.Skills.TryGetSkill(blockSkillID, out var blockSkill)) {
+                throw new ArgumentException($"Skill {blockSkillID} is not registered!");
+            }
+
+            if (blockSkill.Effect is not BlockSkillEffect) {
+                throw new ArgumentException($"{blockSkill} does not have a block skill effect!");
+            }
+
+            CurrentBlockSkill = blockSkill;
+        }
+
+        protected void SetDefaultCounterSkill(int defaultCounterSkillID) {
+            if (!_game.Skills.IsRegistered(defaultCounterSkillID)) {
+                throw new ArgumentException($"Skill {defaultCounterSkillID} is not registered!");
+            }
+
+            DefaultCounterSkill = _game.Skills[defaultCounterSkillID];
+        }
+
+        public void SetCounterSkill(int counterSkillID) {
+            if (!_game.Skills.IsRegistered(counterSkillID)) {
+                throw new ArgumentException($"Skill {counterSkillID} is not registered!");
+            }
+
+            CurrentCounterSkill = _game.Skills[counterSkillID];
+        }
+
+        public void ResetCounterSkillToDefault() {
+            CurrentCounterSkill = DefaultCounterSkill;
+        }
+
+        public void SetTargetBattler(in IBattlerWorldObject battler) {
+            var previousTarget = CurrentTargetBattler;
+            CurrentTargetBattler = battler;
+
+            OnChangeTargetBattler?.Invoke(previousTarget, CurrentTargetBattler);
+        }
+
+        public void ResetTargetBattlerToNull() {
+            var previousTarget = CurrentTargetBattler;
+            CurrentTargetBattler = null;
+
+            OnChangeTargetBattler?.Invoke(previousTarget, CurrentTargetBattler);
+        }
+
+        public void SetTargetSkill(int skillID) {
+            if (!_game.Skills.IsRegistered(skillID)) {
+                throw new ArgumentException($"Skill {skillID} is not registered!");
+            }
+
+            var previousSkill = CurrentTargetSkill;
+            CurrentTargetSkill = _game.Skills[skillID];
+
+            OnChangeTargetSkill?.Invoke(previousSkill, CurrentTargetSkill);
+        }
+
+        public void ResetTargetSkillToNull() {
+            var previousSkill = CurrentTargetSkill;
+            CurrentTargetSkill = null;
+
+            OnChangeTargetSkill?.Invoke(previousSkill, CurrentTargetSkill);
+        }
+
+        public void SetBlockTargetBattler(in IBattlerWorldObject battler) => CurrentBlockTargetBattler = battler;
+        public void ResetBlockTargetBattlerToNull() => CurrentBlockTargetBattler = null;
     }
 }

@@ -84,7 +84,7 @@ namespace AWE.Synzza {
 
         protected override SkillEffectUsageCapture CreateEffectUsageCapture(Skill sourceSkill, IBattlerWorldObject sourceBattler, in DurationProfile<float> windDownSeconds) {
             _template.SetSourceBattler(sourceBattler);
-            _template.SetSkillHitbox(new(sourceBattler.Battler, sourceSkill, IsFriendlyFire));
+            _template.SetSkillHitbox(new(sourceBattler, sourceSkill, IsFriendlyFire));
             var capture = new Capture(_template, windDownSeconds, IsIndefinite);
             _template.ClearSkillHitbox();
             _template.ClearSourceBattler();

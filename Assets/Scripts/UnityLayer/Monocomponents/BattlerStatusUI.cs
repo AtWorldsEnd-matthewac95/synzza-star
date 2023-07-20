@@ -5,14 +5,14 @@ namespace AWE.Synzza.UnityLayer {
     [RequireComponent(typeof(TextMeshProUGUI))]
     public class BattlerStatusUI : MonoBehaviour {
         public Camera WorldGameCamera;
-        public BattlerMonocomponent BattlerMono;
+        public UnityBattlerWorldObject BattlerWorldObject;
 
         private TextMeshProUGUI _text;
 
         private void Start() {
-            Debug.Assert(BattlerMono != null, $"{typeof(BattlerStatusUI).Name} \"{gameObject.name}\" does not have a {typeof(BattlerMonocomponent).Name} instance assigned!");
+            Debug.Assert(BattlerWorldObject != null, $"{typeof(BattlerStatusUI).Name} \"{gameObject.name}\" does not have a {typeof(UnityBattlerWorldObject).Name} instance assigned!");
 
-            if (BattlerMono == null) {
+            if (BattlerWorldObject == null) {
                 Destroy(gameObject);
             }
 
@@ -25,9 +25,9 @@ namespace AWE.Synzza.UnityLayer {
         }
 
         private void Update() {
-            var status = BattlerMono.Battler.Status.Current;
+            var status = BattlerWorldObject.Battler.Status.Current;
             _text.text = status.ToString();
-            var screenPoint = (2f * WorldGameCamera.WorldToViewportPoint(BattlerMono.transform.position)) - Vector3.one;
+            var screenPoint = (2f * WorldGameCamera.WorldToViewportPoint(BattlerWorldObject.transform.position)) - Vector3.one;
             transform.localPosition = new Vector3(screenPoint.x * transform.parent.position.x, screenPoint.y * transform.parent.position.y);
         }
     }

@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 268cde548e7e0624b818cd7b775a79b9, type: 3}
   m_Name: Default Battler Stagger Profile
   m_EditorClassIdentifier: 
-  _durationSeconds: 1
+  _durationSeconds: 0.5

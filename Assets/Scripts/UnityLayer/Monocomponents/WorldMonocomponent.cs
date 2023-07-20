@@ -19,7 +19,7 @@ namespace AWE.Synzza.UnityLayer {
         public IBattlerWorldObject FindClosestBattler(in float3 origin, byte withFactionID) => FindClosestBattler(isUsingFactionID: true, factionIdToFind: withFactionID);
 
         private IBattlerWorldObject FindClosestBattler(bool isUsingFactionID, byte factionIdToFind) {
-            return !isUsingFactionID || factionIdToFind == SingletonSynzzaGame.Current.PlayerFactionID ? new UnityBattlerWorldObject(_player) : null;
+            return !isUsingFactionID || factionIdToFind == SingletonSynzzaGame.Current.PlayerFactionID ? _player.WorldObject : null;
         }
 
         public IWorldObject SpawnObjectFromTemplate(in IWorldObjectTemplate template, in float3 position, in float4 quaternion) {
@@ -29,18 +29,13 @@ namespace AWE.Synzza.UnityLayer {
 
             var t = Instantiate(prefab.Prefab, position.ToVector3(), quaternion.ToQuaternion()).transform;
 
-            // Way to many ifs, split control flow... this is horrible.
-
             if (template is UnitySkillHitboxPrefab skillHitboxPrefab) {
-                if (skillHitboxPrefab.SourceBattler is UnityBattlerWorldObject worldBattler) {
-                    if (worldBattler.transform.gameObject.TryGetComponent(out BattlerMonocomponent battlerMono)) {
-                        return new UnitySkillHitboxWorldObject(skillHitboxPrefab.SkillHitbox, battlerMono, t);
-                    } else {
-                        throw new ArgumentException($"No {typeof(BattlerMonocomponent).Name} in {skillHitboxPrefab.GetType().Name} instance!");
-                    }
-                } else {
-                    throw new ArgumentException($"{GetType().Name} cannot instantiate {skillHitboxPrefab.GetType().Name} instances that have no {typeof(UnityBattlerWorldObject)} source battler!");
+                if (!t.gameObject.TryGetComponent(out SkillHitboxMonocomponent hitboxMono)) {
+                    hitboxMono = t.gameObject.AddComponent<SkillHitboxMonocomponent>();
                 }
+
+                hitboxMono.Initialize(skillHitboxPrefab.SkillHitbox);
+                return hitboxMono.WorldObject;
             }
 
             return template switch {
