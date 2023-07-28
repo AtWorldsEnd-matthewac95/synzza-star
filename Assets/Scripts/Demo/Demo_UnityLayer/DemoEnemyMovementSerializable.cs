@@ -33,7 +33,7 @@ namespace AWE.Synzza.Demo.UnityLayer {
         public DemoEnemyMovement ToDemoEnemyMovement() => new(
             _validPositionalTargetCount,
             _targetPlayerChance,
-            _positionalTargets.Select<Transform, IWorldObject>(t => new UnityWorldObject(t, isMobile: false)),
+            _positionalTargets.Select(t => new WorldObject(new UnityWorldObject(t, isMobile: false))),
             _speed
         );
     }

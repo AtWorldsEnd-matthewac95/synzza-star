@@ -3,23 +3,24 @@ using UnityEngine;
 
 namespace AWE.Synzza.UnityLayer.Example {
     [RequireComponent(typeof(Rigidbody))]
-    [RequireComponent(typeof(DemoPlayerMovementMonocomponent))]
-    public class PlayerNavAgentMonocomponent : BattlerMonocomponent {
+    public class PlayerNavAgentMonocomponent : BattlerNavAgentMonocomponent {
         [SerializeField] private float _speed;
         [SerializeField] private BattlerMeleeRules _continuousState;
+        [SerializeField] private PlayerBattleInputUI _battleInput;
 
         [SerializeField] private bool _isCurrentlyNavmeshControlled = false;
 
+        protected override bool IsAgentPickingNewTargetsBasedOnProximity => false;
+
         private Rigidbody _rigidbody;
-        private DemoPlayerMovementMonocomponent _movement;
 
         protected override void Awake() {
             base.Awake();
             _agent.speed = _speed;
 
             _rigidbody = GetComponent<Rigidbody>();
-            _movement = GetComponent<DemoPlayerMovementMonocomponent>();
-            Debug.Log($"Player is \"{WorldObject.Battler.DisplayName}\"");
+            _battleInput.OnPlayerSelectedTargetBattler += OnPlayerSelectedTargetBattler;
+            _battleInput.AssignPlayer(WorldObject);
 
             SetIsCurrentlyNavmeshControlled(false, isAllowingEarlyReturn: false);
         }
@@ -29,10 +30,19 @@ namespace AWE.Synzza.UnityLayer.Example {
         }
 
         protected override void PickNewDestination() {
-            var enemy = _movement.GetNextEnemy();
-            _currentTarget = enemy.WorldObject;
-            _currentTargetTransform = enemy.transform;
-            WorldObject.Battler.SetTargetBattler(enemy.WorldObject);
+            if (!_battleInput.IsSelecting) {
+                _battleInput.BeginSelection();
+            }
+        }
+
+        protected virtual void OnPlayerSelectedTargetBattler(BattlerWorldObject enemy) {
+            if (_battleInput.IsSelecting) {
+                var enemyTransform = enemy.GetImpl<UnityWorldObject>();
+                _currentTarget = enemy;
+                _currentTargetTransform = enemyTransform.transform;
+                WorldObject.Battler.SetTargetBattler(enemy);
+                _battleInput.EndSelection();
+            }
         }
 
         protected override void Update() {
@@ -40,7 +50,6 @@ namespace AWE.Synzza.UnityLayer.Example {
             Debug_CheckForContinuousStateChange();
 
             if (_isCurrentlyNavmeshControlled) {
-
                 base.Update();
             }
         }

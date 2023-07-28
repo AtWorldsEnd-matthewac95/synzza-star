@@ -7,7 +7,7 @@ namespace AWE.Synzza.UnityLayer {
         private bool _isInitialized = false;
 
         public bool IsInitialized => _isInitialized;
-        public UnitySkillHitboxWorldObject WorldObject { get; private set; }
+        public SkillHitboxWorldObject WorldObject { get; private set; }
 
         public void Initialize(SkillHitbox skillHitbox) {
             if (_isInitialized) {
@@ -15,7 +15,7 @@ namespace AWE.Synzza.UnityLayer {
                 return;
             }
 
-            WorldObject = new(skillHitbox, this);
+            WorldObject = new(new UnityWorldObject(this), skillHitbox);
             _isInitialized = true;
         }
 

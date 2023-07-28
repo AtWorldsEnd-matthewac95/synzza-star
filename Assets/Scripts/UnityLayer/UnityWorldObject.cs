@@ -3,18 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace AWE.Synzza.UnityLayer {
-    public class UnityWorldObject : IWorldObject {
+    public interface IUnityWorldObject : IWorldObject {
+        Transform transform { get; }
+    }
+
+    public class UnityWorldObject : WorldObject.Impl, IUnityWorldObject {
         public Transform transform { get; }
-        public bool IsMobile { get; set; }
+
+        private bool _isMobile;
+
+        public override bool IsMobile => _isMobile;
+        public void SetIsMobile(bool value) => _isMobile = value;
 
         protected MonoBehaviour _mono;
         public MonoBehaviour Mono => _mono;
 
-        private List<UnityCoroutine> _activeCoroutines = new();
+        private readonly List<UnityCoroutine> _activeCoroutines = new();
 
         public UnityWorldObject(Transform T, bool isMobile = true) {
             transform = T;
-            IsMobile = isMobile;
+            _isMobile = isMobile;
 
             if (!transform.gameObject.TryGetComponent(out _mono)) {
                 _mono = null;
@@ -23,7 +31,7 @@ namespace AWE.Synzza.UnityLayer {
         public UnityWorldObject(MonoBehaviour mono, bool isMobile = true) {
             _mono = mono;
             transform = _mono.transform;
-            IsMobile = isMobile;
+            _isMobile = isMobile;
         }
 
         public bool TrySetMono(MonoBehaviour mono) {
@@ -40,17 +48,17 @@ namespace AWE.Synzza.UnityLayer {
             return success;
         }
 
-        public float3 LocalPosition => transform.localPosition.ToFloat3();
-        public float3 WorldPosition => transform.position.ToFloat3();
-        public float3 LocalRotation => transform.localEulerAngles.ToFloat3();
-        public float3 WorldRotation => transform.eulerAngles.ToFloat3();
-        public float4 LocalQuaternion => transform.localRotation.ToFloat4();
-        public float4 WorldQuaternion => transform.rotation.ToFloat4();
-        public float3 LocalScale => transform.localScale.ToFloat3();
-        public float3 WorldScale => transform.lossyScale.ToFloat3();
-        public float3 WorldForward => transform.forward.ToFloat3();
-        public float3 WorldRight => transform.right.ToFloat3();
-        public float3 WorldUp => transform.up.ToFloat3();
+        public override float3 LocalPosition => transform.localPosition.ToFloat3();
+        public override float3 WorldPosition => transform.position.ToFloat3();
+        public override float3 LocalRotation => transform.localEulerAngles.ToFloat3();
+        public override float3 WorldRotation => transform.eulerAngles.ToFloat3();
+        public override float4 LocalQuaternion => transform.localRotation.ToFloat4();
+        public override float4 WorldQuaternion => transform.rotation.ToFloat4();
+        public override float3 LocalScale => transform.localScale.ToFloat3();
+        public override float3 WorldScale => transform.lossyScale.ToFloat3();
+        public override float3 WorldForward => transform.forward.ToFloat3();
+        public override float3 WorldRight => transform.right.ToFloat3();
+        public override float3 WorldUp => transform.up.ToFloat3();
 
         private void AddToActiveCoroutines(UnityCoroutine coroutine) {
             coroutine.OnFinished += RemoveFromActiveCoroutines;
@@ -78,7 +86,7 @@ namespace AWE.Synzza.UnityLayer {
             }
         }
 
-        public void StartCoroutine(in IEnumerator<ICoWait> coroutine) {
+        public override void StartCoroutine(in IEnumerator<ICoWait> coroutine) {
             if (_mono != null) {
                 var activeCoroutine = new UnityCoroutine(coroutine);
                 AddToActiveCoroutines(activeCoroutine);
@@ -86,13 +94,13 @@ namespace AWE.Synzza.UnityLayer {
             }
         }
 
-        public void StartCoroutine(in IEnumerable<ICoWait> coroutine) {
+        public override void StartCoroutine(in IEnumerable<ICoWait> coroutine) {
             if (_mono != null) {
                 _mono.StartCoroutine(new UnityCoroutine(coroutine));
             }
         }
 
-        public void StopCoroutine(in IEnumerator<ICoWait> coroutine) {
+        public override void StopCoroutine(in IEnumerator<ICoWait> coroutine) {
             if (_mono != null) {
                 for (var i = 0; i < _activeCoroutines.Count; ++i) {
                     var activeCoroutine = _activeCoroutines[i];
@@ -104,16 +112,18 @@ namespace AWE.Synzza.UnityLayer {
             }
         }
 
-        public void StopAllCoroutines() {
+        public override void StopAllCoroutines() {
             if (_mono != null) {
                 _mono.StopAllCoroutines();
+
+                for (int i = 0; i < _activeCoroutines.Count; ++i) {
+                    _activeCoroutines[i] = null;
+                }
             }
         }
 
-        public event SceneObjectPreDestroyDelegate OnPreDestroy;
-
-        public void Destroy() {
-            OnPreDestroy?.Invoke(this);
+        public override void Destroy() {
+            InvokeOnPreDestroy();
             UnityEngine.Object.Destroy(transform.gameObject);
         }
     }

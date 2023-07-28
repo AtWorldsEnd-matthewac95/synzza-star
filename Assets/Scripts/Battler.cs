@@ -11,6 +11,7 @@ namespace AWE.Synzza {
 
     public class Battler : SynzzaGameDependent {
         public byte FactionID { get; private set; }
+        public bool IsPlayerBattler => FactionID == _game.PlayerFactionID;
 
         public void SetFaction(in BattlerFaction faction) => SetFaction(faction.ID, faction.DisplayName);
         public void SetFaction(byte factionId) => SetFaction(factionId, string.Empty);
@@ -78,6 +79,7 @@ namespace AWE.Synzza {
 
             Status = new();
             Status.OnStaggerApplied += OnStaggerApplied;
+            Status.OnSkillWindDown += OnSkillWindDown;
 
             FactionID = BattlerFaction.ID_NONE;
             CurrentBattle = null;
@@ -89,6 +91,15 @@ namespace AWE.Synzza {
             }
 
             OnSkillEffectCancelled?.Invoke(BattlerStatusState.Staggered);
+            ResetTargetBattlerToNull();
+        }
+
+        protected virtual void OnSkillWindDown() {
+            if (Status.Current != BattlerStatusState.SkillWindDown) {
+                throw new InvalidOperationException($"{GetType().Name} \"{DisplayName}\" attempted to run {MethodBase.GetCurrentMethod().Name} when its status was {Status.Current}!");
+            }
+
+            ResetTargetBattlerToNull();
         }
 
         public void SetBlockSkill(int blockSkillID) {

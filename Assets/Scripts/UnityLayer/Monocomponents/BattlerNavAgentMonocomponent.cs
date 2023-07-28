@@ -4,21 +4,21 @@ namespace AWE.Synzza.UnityLayer {
     /*
      * This script is configured to execute before the default time. In the Unity editor, go to Edit->Project Settings->Script Execution Order for more details.
      */
-    // TODO - Rename to BattlerNavAgentMonocomponent
-    public class BattlerMonocomponent : NavmeshAgentMonocomponent {
+    public abstract class BattlerNavAgentMonocomponent : NavmeshAgentMonocomponent {
         [SerializeField] protected BattlerScrib _battler;
         [SerializeField] protected BattlerFactionScrib _faction;
         [SerializeField] protected BattlerStatusUI _statusText;
         [SerializeField] protected SkillScrib _demoAttackSkill;
 
-        public UnityBattlerWorldObject WorldObject { get; protected set; }
+        public BattlerWorldObject WorldObject { get; protected set; }
 
         protected override void Awake() {
             base.Awake();
 
-            WorldObject = new(_battler.ToBattler(), this);
+            WorldObject = new(new UnityWorldObject(this), _battler.ToBattler());
             WorldObject.Battler.SetFaction(_faction.ToBattlerFaction());
             WorldObject.Battler.Status.OnBlockStatusChanged += OnBattlerBlockStatusChanged;
+            WorldObject.Battler.OnChangeTargetBattler += OnBattlerChangeTarget;
 
             if (_statusText != null) {
                 _statusText.BattlerWorldObject = WorldObject;
@@ -30,6 +30,8 @@ namespace AWE.Synzza.UnityLayer {
 
             WorldObject.Battler.Status.OnStationaryStatusChanged += OnBattlerStationaryStatusChanged;
             WorldObject.Battler.SetTargetSkill(_demoAttackSkill.ID);
+
+            SingletonSynzzaGame.Current.GetCurrentWorld().Battlers.AddBattler(WorldObject);
         }
 
         protected override void Update() {
@@ -58,7 +60,11 @@ namespace AWE.Synzza.UnityLayer {
             }
         }
 
-        protected override void PickNewDestination() { }
+        protected void OnBattlerChangeTarget(in IBattlerWorldObject _, in IBattlerWorldObject newTarget) {
+            if (newTarget == null) {
+                WorldObject.CheckIfPlayerBattlerNeedsInput();
+            }
+        }
 
         protected virtual void OnBattlerStationaryStatusChanged(bool isNowStationary) {
             if (_agent.isActiveAndEnabled) {
@@ -83,7 +89,7 @@ namespace AWE.Synzza.UnityLayer {
                 return;
             }
 
-            UnitySkillHitboxWorldObject hitbox = null;
+            SkillHitboxWorldObject hitbox = null;
 
             if (collider.gameObject.TryGetComponent(out SkillHitboxColliderMonocomponent colliderMono) && colliderMono.IsInitialized) {
                 hitbox = colliderMono.Parent.WorldObject;

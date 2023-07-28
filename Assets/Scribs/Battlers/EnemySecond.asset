@@ -18,5 +18,5 @@ MonoBehaviour:
   _innateMeleeRules: 0
   _staggerProfile: {fileID: 11400000, guid: 928cb037e64f76b44ae10dd2f935399e, type: 2}
   _blockSkill: {fileID: 11400000, guid: 7c83fe730201d1e4fa21bef3788656a6, type: 2}
-  _defaultCounterSkill: {fileID: 11400000, guid: 46b55d08172cb0842835d7b2cc16b7d3,
+  _defaultCounterSkill: {fileID: 11400000, guid: aa3c90168ef111c42bc160b06d70a190,
     type: 2}

@@ -150,10 +150,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ee90ff6e9f464740a4a8fe70d3e8a44, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _isPickingNewDestinationOnStart: 1
   _battler: {fileID: 11400000, guid: c3ac8b8c97dd8024293bbacb70b30a33, type: 2}
   _faction: {fileID: 11400000, guid: e5428acfe135d5f4eb99126c2b498b2a, type: 2}
   _statusText: {fileID: 0}
-  _demoAttackSkill: {fileID: 11400000, guid: 46b55d08172cb0842835d7b2cc16b7d3, type: 2}
+  _demoAttackSkill: {fileID: 11400000, guid: aa3c90168ef111c42bc160b06d70a190, type: 2}
   _movementSettings:
     _positionalTargets:
     - {fileID: 0}
@@ -165,5 +166,5 @@ MonoBehaviour:
     - {fileID: 0}
     - {fileID: 0}
     _validPositionalTargetCount: 5
-    _targetPlayerChance: 0.4
+    _targetPlayerChance: 0.55
     _speed: 3.5

@@ -27,6 +27,7 @@
         public event SkillWindDownDelegate OnSkillWindDown;
         public event BlockStatusChangedDelegate OnBlockStatusChanged;
         public event StationaryStatusChangedDelegate OnStationaryStatusChanged;
+        public event BattlerStatusChangedDelegate OnStateRemoved;
 
         public BattlerStatus() {
             Current = BattlerStatusState.OK;
@@ -76,6 +77,8 @@
                 bool isRemovingStationary = Current.IsStationaryState();
 
                 Current = BattlerStatusState.OK;
+
+                OnStateRemoved?.Invoke(stateToRemove, Current);
 
                 if (isRemovingBlock) {
                     OnBlockStatusChanged?.Invoke(isNowBlocking: false);

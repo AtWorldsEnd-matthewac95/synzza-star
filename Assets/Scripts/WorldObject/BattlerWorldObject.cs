@@ -1,29 +1,39 @@
 ﻿using System.Collections.Generic;
-using UnityEngine;
 
-namespace AWE.Synzza.UnityLayer {
-    public class UnityBattlerWorldObject : UnityWorldObject, IBattlerWorldObject {
+namespace AWE.Synzza {
+    // TODO - Replace this interface with an abstract base class.
+    public interface IBattlerWorldObject : IMutableWorldObject {
+        Battler Battler { get; }
+        SkillUsage CurrentSkillUsage { get; }
+        bool IsInvincible { get; }
+
+        event PlayerBattlerNeedsInputDelegate OnPlayerBattlerNeedsInput;
+
+        bool TrySetCurrentSkillUsage(SkillUsage usage);
+        void ReactToSkillHitbox(in ISkillHitboxWorldObject hitbox);
+
+        void CheckIfPlayerBattlerNeedsInput(BattlerStatusState oldStatusState, BattlerStatusState newStatusState);
+        void CheckIfPlayerBattlerNeedsInput();
+    }
+
+    public class BattlerWorldObject : WorldObject, IBattlerWorldObject {
         public const float INVINCIBLE_DURATION = 0.3f;
 
         public Battler Battler { get; }
-        public SkillUsage CurrentSkillUsage { get; private set; }
+        public SkillUsage CurrentSkillUsage { get; protected set; }
         public bool IsInvincible { get; protected set; }
 
-        public UnityBattlerWorldObject(Battler battler, Transform T, bool isMobile = true) : base(T, isMobile) {
-            Battler = battler;
-            SubscribeToBattlerEvents(Battler);
-            CurrentSkillUsage = null;
-        }
-        public UnityBattlerWorldObject(Battler battler, MonoBehaviour mono, bool isMobile = true) : base(mono, isMobile) {
-            Battler = battler;
-            SubscribeToBattlerEvents(Battler);
-            CurrentSkillUsage = null;
-        }
+        public event PlayerBattlerNeedsInputDelegate OnPlayerBattlerNeedsInput;
 
-        private void SubscribeToBattlerEvents(Battler battler) {
-            battler.OnSkillEffectCancelled += OnBattlerSkillEffectCancelled;
-            battler.Status.OnSkillWindDown += OnBattlerSkillWindDown;
-            battler.OnUpdateMeleeRules += OnBattlerUpdateMeleeRules;
+        public BattlerWorldObject(Impl impl, Battler battler) : base(impl) {
+            Battler = battler;
+            CurrentSkillUsage = null;
+            IsInvincible = false;
+
+            Battler.OnSkillEffectCancelled += OnBattlerSkillEffectCancelled;
+            Battler.Status.OnSkillWindDown += OnBattlerSkillWindDown;
+            Battler.OnUpdateMeleeRules += OnBattlerUpdateMeleeRules;
+            Battler.Status.OnStateRemoved += CheckIfPlayerBattlerNeedsInput;
         }
 
         public bool TrySetCurrentSkillUsage(SkillUsage usage) {
@@ -39,6 +49,12 @@ namespace AWE.Synzza.UnityLayer {
             return true;
         }
 
+        protected void EndCurrentSkillUsage() {
+            CurrentSkillUsage.Skill.Effect.InterruptEffect(this, CurrentSkillUsage.EffectUsage.Capture);
+            StopCoroutine(CurrentSkillUsage.EffectUsage.Coroutine);
+            CurrentSkillUsage = null;
+        }
+
         public void ReactToSkillHitbox(in ISkillHitboxWorldObject hitbox) {
             var sourceBattlerObject = hitbox.Hitbox.SourceBattler;
             var sourceBattler = sourceBattlerObject.Battler;
@@ -51,8 +67,6 @@ namespace AWE.Synzza.UnityLayer {
                 Battler.Status.ApplyState(BattlerStatusState.Staggered);
                 StartCoroutine(CreateStaggerCoroutine(Battler.StaggerProfile.DurationSeconds));
             } else {
-                sourceBattler.Status.ApplyState(BattlerStatusState.Staggered);
-
                 if (Battler.CurrentMeleeRules == BattlerMeleeRules.AutoCounter) {
                     if (Battler.CurrentBlockTargetBattler == null) {
                         Battler.SetBlockTargetBattler(sourceBattlerObject);
@@ -65,16 +79,35 @@ namespace AWE.Synzza.UnityLayer {
             StartCoroutine(CreateInvincibilityCoroutine());
         }
 
+        public void CheckIfPlayerBattlerNeedsInput(BattlerStatusState oldStatusState, BattlerStatusState newStatusState) {
+            if (newStatusState == BattlerStatusState.OK) {
+                _CheckIfPlayerBattlerNeedsInput();
+            }
+        }
+
+        public void CheckIfPlayerBattlerNeedsInput() {
+            if (Battler.Status.Current == BattlerStatusState.OK) {
+                _CheckIfPlayerBattlerNeedsInput();
+            }
+        }
+
+        private void _CheckIfPlayerBattlerNeedsInput() {
+            if (Battler.IsPlayerBattler && IsPlayerNeedingInput()) {
+                OnPlayerBattlerNeedsInput?.Invoke(this);
+            }
+        }
+
+        protected virtual bool IsPlayerNeedingInput() => Battler.CurrentTargetBattler == null;
+
         protected IEnumerable<ICoWait> CreateInvincibilityCoroutine(float duration = INVINCIBLE_DURATION) {
             IsInvincible = true;
             yield return new CoWaitForSeconds(duration);
             IsInvincible = false;
         }
 
-        protected void EndCurrentSkillUsage() {
-            CurrentSkillUsage.Skill.Effect.InterruptEffect(this, CurrentSkillUsage.EffectUsage.Capture);
-            StopCoroutine(CurrentSkillUsage.EffectUsage.Coroutine);
-            CurrentSkillUsage = null;
+        protected IEnumerator<ICoWait> CreateStaggerCoroutine(float staggerDurationSeconds) {
+            yield return new CoWaitForSeconds(staggerDurationSeconds);
+            Battler.Status.RemoveState(BattlerStatusState.Staggered);
         }
 
         protected virtual void OnBattlerSkillEffectCancelled(BattlerStatusState cancellingStatus) {
@@ -96,9 +129,12 @@ namespace AWE.Synzza.UnityLayer {
             }
         }
 
-        protected IEnumerator<ICoWait> CreateStaggerCoroutine(float staggerDurationSeconds) {
-            yield return new CoWaitForSeconds(staggerDurationSeconds);
-            Battler.Status.RemoveState(BattlerStatusState.Staggered);
+        protected virtual void OnBattlerSkillWindDown() {
+            if (CurrentSkillUsage.EffectUsage.Effect.IsIndefinite) {
+                OnBattlerSkillEffectCancelled(BattlerStatusState.SkillWindDown);
+            } else if (CurrentSkillUsage.EffectUsage.Capture is HitboxSkillEffect.Capture capture) {
+                StartCoroutine(CreateWindDownCoroutine(capture.WindDownSeconds.Duration));
+            }
         }
 
         protected IEnumerator<ICoWait> CreateWindDownCoroutine(float windDownDurationSeconds) {
@@ -110,14 +146,6 @@ namespace AWE.Synzza.UnityLayer {
             yield return new CoWaitForSeconds(windDownDurationSeconds);
             Battler.Status.RemoveState(BattlerStatusState.SkillWindDown);
             CurrentSkillUsage = null;
-        }
-
-        protected virtual void OnBattlerSkillWindDown() {
-            if (CurrentSkillUsage.EffectUsage.Effect.IsIndefinite) {
-                OnBattlerSkillEffectCancelled(BattlerStatusState.SkillWindDown);
-            } else if (CurrentSkillUsage.EffectUsage.Capture is HitboxSkillEffect.Capture capture) {
-                StartCoroutine(CreateWindDownCoroutine(capture.WindDownSeconds.Duration));
-            }
         }
 
         protected virtual void OnBattlerUpdateMeleeRules(bool isSameState, BattlerMeleeRules newState) {

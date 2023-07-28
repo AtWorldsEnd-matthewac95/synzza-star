@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AWE.Synzza.UnityLayer;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,11 +7,11 @@ namespace AWE.Synzza.Demo {
     public class DemoEnemyMovement : INpcMovement {
         public const int MIN_VALID_POSITIONAL_TARGET_COUNT = 2;
 
-        private readonly IWorldObject[] _positionalTargets;
+        private readonly WorldObject[] _positionalTargets;
         private int _validPositionalTargetCount;
         private int _positionalTargetSwapIndex = 0;
 
-        public ReadOnlySpan<IWorldObject> PositionalTargets => new(_positionalTargets);
+        public ReadOnlySpan<WorldObject> PositionalTargets => new(_positionalTargets);
         public float TargetPlayerChance { get; set; }
         public int ValidPositionalTargetCount {
             get => _validPositionalTargetCount;
@@ -18,18 +19,24 @@ namespace AWE.Synzza.Demo {
         }
         public float Speed { get; set; }
 
-        public DemoEnemyMovement(int validPositionalTargetCount, float targetPlayerChance, IEnumerable<IWorldObject> positionalTargets, float speed) {
+        public DemoEnemyMovement(int validPositionalTargetCount, float targetPlayerChance, IEnumerable<WorldObject> positionalTargets, float speed) {
             _positionalTargets = positionalTargets.ToArray();
             ValidPositionalTargetCount = validPositionalTargetCount;
             TargetPlayerChance = targetPlayerChance;
             Speed = speed;
         }
 
-        public IWorldObject PickNewMovementTarget(IWorldObject previousTarget) {
+        public UnityWorld World { get; set; }
+
+        public WorldObject PickNewMovementTarget(WorldObject previousTarget) {
+            if (World == null) {
+                World = SingletonSynzzaGame.Current.GetCurrentWorld() as UnityWorld;
+            }
+
             if ((previousTarget is not IBattlerWorldObject previousTargetBattler || previousTargetBattler.Battler.FactionID != SingletonSynzzaGame.Current.PlayerFactionID)
                 && (GameRandom.NextFloat() < TargetPlayerChance)
             ) {
-                return SingletonSynzzaGame.Current.GetCurrentWorld().FindClosestBattler(default, SingletonSynzzaGame.Current.PlayerFactionID);
+                return World.FindClosestBattler(default, SingletonSynzzaGame.Current.PlayerFactionID);
             }
 
             var index = GameRandom.Range(0, _validPositionalTargetCount);

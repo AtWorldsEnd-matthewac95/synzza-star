@@ -144,9 +144,9 @@ namespace AWE.Synzza {
             }
 
             _currentWorld = world;
-            _currentWorld.OnExit += ResetCurrentWorld;
+            _currentWorld.OnExit += ClearCurrentWorld;
         }
 
-        private void ResetCurrentWorld() => _currentWorld = null;
+        private void ClearCurrentWorld() => _currentWorld = null;
     }
 }

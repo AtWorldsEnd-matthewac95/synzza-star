@@ -21,6 +21,7 @@ namespace AWE.Synzza {
         public bool TryGetRegistered(byte id, out TRegisterable registered) {
             bool success = IsRegistered(id);
             registered = success ? this[id] : default;
+
             return success;
         }
 

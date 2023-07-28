@@ -71,7 +71,7 @@ namespace AWE.Synzza {
             Skill = skill;
             EffectUsage = effectUsage;
             Target = target;
-            Target.OnPreDestroy += (preDestroyObject) => {
+            Target.OnPreDestroy += (in IMutableWorldObject preDestroyObject) => {
                 if (preDestroyObject == Target) {
                     Target = null;
                 }
